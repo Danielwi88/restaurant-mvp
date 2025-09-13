@@ -7,11 +7,13 @@ import CartPage from "@/pages/Cart";
 import Checkout from "@/pages/Checkout";
 import Success from "@/pages/Success";
 import Orders from "@/pages/Orders";
+import Categories from "@/pages/Categories";
 
 const router = createBrowserRouter([
   { path: "/", element: <Home/> },
   { path: "/auth", element: <Auth/> },
   { path: "/restaurant/:id", element: <RestaurantDetail/> },
+  { path: "/categories", element: <Categories/> },
   { path: "/cart", element: <CartPage/> },
   { path: "/checkout", element: <Checkout/> },
   { path: "/success", element: <Success/> },

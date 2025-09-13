@@ -9,6 +9,7 @@ export type MenuItem = {
 export type Restaurant = {
   id: string; name: string; address?: string;
   logoUrl?: string; bannerUrls?: string[]; rating?: number; distanceKm?: number;
+  coords?: { lat: number; long: number };
 };
 
 export type CartItem = { id: string; name: string; price: number; qty: number; imageUrl?: string; restaurantId?: string; };

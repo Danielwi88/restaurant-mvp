@@ -16,6 +16,13 @@ type RestaurantApi = {
   rating?: number
   distance?: number
   distanceKm?: number
+  coordinates?: { lat?: number; long?: number; lng?: number; lon?: number; latitude?: number; longitude?: number }
+  lat?: number
+  long?: number
+  lng?: number
+  lon?: number
+  latitude?: number
+  longitude?: number
 }
 
 type MenuApi = {
@@ -58,6 +65,10 @@ function toAbsolute(u?: string): string | undefined {
 }
 
 function mapRestaurant(api: RestaurantApi): Restaurant {
+  const lat = api.coordinates?.lat ?? api.coordinates?.latitude ?? api.lat ?? api.latitude;
+  const lng = api.coordinates?.long ?? api.coordinates?.lng ?? api.coordinates?.longitude ?? api.long ?? api.lng ?? api.lon ?? api.longitude;
+  const distRaw = (api as unknown as Record<string, unknown>);
+  const distCandidate = distRaw?.distance ?? distRaw?.distanceKm ?? (distRaw as any)?.distance_km ?? (distRaw as any)?.distanceKM ?? (distRaw as any)?.distanceInKm ?? (distRaw as any)?.distance_in_km;
   return {
     id: String(api.id),
     name: api.name,
@@ -65,7 +76,8 @@ function mapRestaurant(api: RestaurantApi): Restaurant {
     logoUrl: toAbsolute(api.logo ?? api.logoUrl),
     bannerUrls: (api.images ?? api.bannerUrls)?.map((s) => toAbsolute(s)!) ?? undefined,
     rating: api.star ?? api.averageRating ?? api.rating,
-    distanceKm: api.distance ?? api.distanceKm,
+    distanceKm: distCandidate != null ? Number(distCandidate as number) : undefined,
+    coords: lat != null && lng != null ? { lat: Number(lat), long: Number(lng) } : undefined,
   };
 }
 
@@ -94,7 +106,8 @@ export const useRestaurants = (params?: { q?:string; page?:number; limit?:number
       };
       const query = params?.q?.trim();
       if (query) {
-        // Original API behavior used `location`; keep it minimal to avoid server-side validation issues.
+        // Send both `q` and `location` to maximize compatibility across API variants
+        qp.q = query;
         qp.location = query;
       }
       const res = await apiGet<RestoListResponse>("resto", qp);

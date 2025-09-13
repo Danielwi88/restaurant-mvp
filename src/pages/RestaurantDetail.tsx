@@ -11,6 +11,7 @@ import { MapPinIcon, Share2Icon, StarIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { openModal } from "@/features/ui/uiSlice";
 import { useAppDispatch } from "@/features/store";
+import { distanceKm, formatKm, getCachedGeo } from "@/lib/geo";
 
 const HERO_FALLBACKS = [
   "/fallback3.png",
@@ -41,7 +42,9 @@ export default function RestaurantDetail() {
       images[0] ?? HERO_FALLBACKS[0],
       images[1] ?? HERO_FALLBACKS[1],
       images[2] ?? HERO_FALLBACKS[2],
-      images[3] ?? HERO_FALLBACKS[3],
+      // For the 4th image: prefer images[3], then fallback to images[0],
+      // and finally to fallback6.png via onError handler below.
+      (images[3] ?? images[0]) ?? HERO_FALLBACKS[3],
     ];
   }, [images]);
 
@@ -50,6 +53,13 @@ export default function RestaurantDetail() {
     const key = activeTab.toLowerCase();
     return menu.filter((m) => (m.categoryId ?? "").toLowerCase().includes(key));
   }, [menu, activeTab]);
+
+  // Distance text based on cached user location
+  const distText = (() => {
+    const user = getCachedGeo();
+    const km = user && r?.coords ? distanceKm(user, r.coords) : r?.distanceKm;
+    return formatKm(km);
+  })();
 
   const LoadingDots = () => (
     <span aria-label="loading" className="inline-flex gap-1 align-middle ml-2">
@@ -187,7 +197,7 @@ export default function RestaurantDetail() {
                 <span>{r?.rating ?? 4.9}</span>
                 <span className="text-zinc-400">•</span>
                 <MapPinIcon className="size-4" />
-                <span>{r?.address ?? "Jakarta Selatan"}{r?.distanceKm ? ` · ${r.distanceKm} km` : ""}</span>
+                <span>{r?.address ?? "Jakarta Selatan"}{distText ? ` · ${distText}` : ""}</span>
               </div>
             </div>
           </div>

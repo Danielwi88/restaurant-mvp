@@ -1,4 +1,3 @@
-// src/components/GlobalModal.tsx
 import { useAppDispatch, useAppSelector } from "@/features/store";
 import { closeModal } from "@/features/ui/uiSlice";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";

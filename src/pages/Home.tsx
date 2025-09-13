@@ -11,6 +11,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import Footer from "@/components/Footer";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useGeolocation } from "@/hooks/useGeolocation";
+import { useEffect, useMemo, useState } from "react";
+import type { Restaurant } from "@/types";
+import RestaurantCard from "@/components/RestaurantCard";
 
 export default function Home() {
   const f = useAppSelector((s: RootState) => s.filters);
@@ -19,10 +23,51 @@ export default function Home() {
   const qDebounced = useDebounce(f.q, 350);
   const hasQueryRaw = (f.q ?? "").trim().length > 0;
   const hasQuery = (qDebounced ?? "").trim().length > 0;
+  const pageSize = 20;
+  const [page, setPage] = useState(1);
+  const [acc, setAcc] = useState<Restaurant[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+
   const { data: rec, isLoading: recLoading, isError: recError } = useRecommendedRestaurants({ enabled: !!token && !hasQueryRaw });
-  const { data: restaurants, isLoading, isError, isFetching } = useRestaurants({ q: qDebounced, page: 1, limit: 20, sort: f.sort });
+  const { data: restaurants, isLoading, isError, isFetching } = useRestaurants({ q: qDebounced, page, limit: pageSize, sort: f.sort });
   const { data: menuItems, isLoading: menuLoading, isFetching: menuFetching, isError: menuError } = useMenus({ q: qDebounced, page: 1, limit: 12 });
   const showRecs = !!token && !!rec && !recError && !hasQueryRaw;
+  const geo = useGeolocation();
+  const [recCount, setRecCount] = useState(16);
+
+  // Reset pagination on query/sort change
+  useEffect(() => {
+    setPage(1);
+    setAcc([]);
+    setHasMore(true);
+  }, [qDebounced, f.sort]);
+
+  // Accumulate non-recommended pages
+  useEffect(() => {
+    if (showRecs) return;
+    if (!restaurants) return;
+    setAcc(prev => {
+      const merged = page === 1 ? restaurants : [...prev, ...restaurants];
+      const seen = new Set<string>();
+      const uniq = merged.filter(r => {
+        const id = String(r.id);
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+      return uniq;
+    });
+    if (restaurants.length < pageSize) setHasMore(false);
+  }, [restaurants, page, showRecs]);
+
+  // Reset recommended visible count when switching modes
+  useEffect(() => { if (showRecs) setRecCount(16); }, [showRecs]);
+
+  const list = useMemo(() => (
+    showRecs
+      ? ((rec ?? []).slice(0, recCount))
+      : (acc.length ? acc : (restaurants ?? []))
+  ), [showRecs, rec, recCount, acc, restaurants]);
 
   return (
     <>
@@ -58,21 +103,32 @@ export default function Home() {
       </section>
 
       <section className="max-w-6xl mx-auto mt-120 px-4 py-10">
-        {/* Categories row (visual only) */}
+        {/* Categories row */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
           {[
-            {label:'All Restaurant',icon:'🍔'},
-            {label:'Nearby',icon:'📍'},
-            {label:'Discount',icon:'%'},
-            {label:'Best Seller',icon:'🏆'},
-            {label:'Delivery',icon:'🛵'},
-            {label:'Lunch',icon:'🍚'},
-          ].map((c)=> (
-            <div key={c.label} className="rounded-xl bg-white border border-neutral-200 shadow-sm p-4 flex items-center gap-3">
-              <div className="size-9 grid place-items-center rounded-lg bg-[var(--gray-100)] text-xl">{c.icon}</div>
-              <div className="text-sm font-medium text-zinc-800">{c.label}</div>
-            </div>
-          ))}
+            { label: 'All Restaurant', image: '/Categoryall.png', to: '/categories' },
+            { label: 'Nearby',        image: '/location.png' },
+            { label: 'Discount',      image: '/discount.png' },
+            { label: 'Best Seller',   image: '/bestseller.png' },
+            { label: 'Delivery',      image: '/delivery.png' },
+            { label: 'Lunch',         image: '/lunch.png' },
+          ].map((c)=> {
+            const content = (
+              <div className="rounded-xl bg-white border border-neutral-200 shadow-sm p-4 flex items-center gap-3">
+                <div className="size-12 grid place-items-center rounded-lg bg-[var(--gray-100)] overflow-hidden">
+                  <img src={c.image} alt={c.label} className="w-9 h-9 object-contain" onError={(e)=>{ const img=e.currentTarget; if(!img.src.includes('/fallback1.png')){ img.onerror=null; img.src='/fallback1.png'; }}} />
+                </div>
+                <div className="text-sm font-medium text-zinc-800">{c.label}</div>
+              </div>
+            );
+            return c.to ? (
+              <Link key={c.label} to={c.to} aria-label={c.label}>
+                {content}
+              </Link>
+            ) : (
+              <div key={c.label} aria-label={c.label}>{content}</div>
+            );
+          })}
         </div>
 
         {(showRecs ? recLoading : isLoading) && (
@@ -84,6 +140,11 @@ export default function Home() {
         <div className="mt-8 flex items-center justify-between">
           <h2 className="text-xl font-semibold">{showRecs ? 'Recommended' : 'Restaurants'}</h2>
           <div className="flex items-center gap-3">
+            {showRecs && (
+              <Link to="/categories" className="text-sm font-medium text-red-600 hover:underline">
+                See All
+              </Link>
+            )}
             {!showRecs && (
               <select
                 value={f.sort ?? 'rating_desc'}
@@ -99,30 +160,10 @@ export default function Home() {
             )}
           </div>
         </div>
-        {(showRecs ? rec : restaurants) && (
+        {list && (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-            {(showRecs ? rec! : restaurants!).map(r => (
-              <Link key={r.id} to={`/restaurant/${r.id}`}>
-                <Card className="overflow-hidden shadow-sm border border-neutral-200">
-                  <CardContent className="p-0">
-                    <div className="h-36 w-full bg-zinc-100 flex items-center justify-center">
-                      {r.logoUrl ? (
-                        <img src={r.logoUrl} alt={r.name} className="h-20 object-contain" />
-                      ) : (
-                        <span className="text-zinc-500">{r.name}</span>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <div className="font-semibold">{r.name}</div>
-                      <div className="mt-1 text-sm text-zinc-600 flex items-center gap-2">
-                        <span>⭐ {r.rating ?? '4.9'}</span>
-                        <span className="text-zinc-400">•</span>
-                        <span>{r.address ?? 'Jakarta Selatan'} {r.distanceKm ? `· ${r.distanceKm} km` : ''}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+            {list.map((r) => (
+              <RestaurantCard key={r.id} restaurant={r} userPos={geo.position ?? undefined} />
             ))}
           </div>
         )}
@@ -144,15 +185,29 @@ export default function Home() {
             {menuItems && (
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
                 {menuItems.map((m) => (
-                  <Card key={m.id} className="overflow-hidden shadow-sm border border-neutral-200">
-                    <CardContent className="p-0">
-                      <img src={m.imageUrl || '/fallback1.png'} alt={m.name} className="h-36 w-full object-cover" onError={(e)=>{ const img=e.currentTarget; if(!img.src.includes('/fallback1.png')){img.onerror=null; img.src='/fallback1.png';}}} />
-                      <div className="p-4">
-                        <div className="font-semibold">{m.name}</div>
-                        <div className="mt-1 text-sm text-zinc-600">IDR {new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(m.price)}</div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  m.restaurantId ? (
+                    <Link key={m.id} to={`/restaurant/${m.restaurantId}`}>
+                      <Card className="overflow-hidden shadow-sm border border-neutral-200">
+                        <CardContent className="p-0">
+                          <img src={m.imageUrl || '/fallback1.png'} alt={m.name} className="h-36 w-full object-cover" onError={(e)=>{ const img=e.currentTarget; if(!img.src.includes('/fallback1.png')){img.onerror=null; img.src='/fallback1.png';}}} />
+                          <div className="p-4">
+                            <div className="font-semibold">{m.name}</div>
+                            <div className="mt-1 text-sm text-zinc-600">IDR {new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(m.price)}</div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ) : (
+                    <Card key={m.id} className="overflow-hidden shadow-sm border border-neutral-200">
+                      <CardContent className="p-0">
+                        <img src={m.imageUrl || '/fallback1.png'} alt={m.name} className="h-36 w-full object-cover" onError={(e)=>{ const img=e.currentTarget; if(!img.src.includes('/fallback1.png')){img.onerror=null; img.src='/fallback1.png';}}} />
+                        <div className="p-4">
+                          <div className="font-semibold">{m.name}</div>
+                          <div className="mt-1 text-sm text-zinc-600">IDR {new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(m.price)}</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
                 ))}
               </div>
             )}
@@ -164,9 +219,27 @@ export default function Home() {
             No results for "{qDebounced}". Try a different keyword.
           </div>
         )}
-        <div className="text-center mt-8">
-          <button className="px-4 py-2 rounded-full border border-neutral-300 bg-white shadow-sm">Show More</button>
-        </div>
+        {showRecs && rec && list.length < (rec?.length ?? 0) && (
+          <div className="text-center mt-8">
+            <button
+              className="px-4 py-2 rounded-full border border-neutral-300 bg-white shadow-sm"
+              onClick={() => setRecCount((n) => n + 16)}
+            >
+              Show More
+            </button>
+          </div>
+        )}
+        {!showRecs && list && list.length > 0 && hasMore && (
+          <div className="text-center mt-8">
+            <button
+              className="px-4 py-2 rounded-full border border-neutral-300 bg-white shadow-sm disabled:opacity-60"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={isFetching}
+            >
+              {isFetching ? 'Loading…' : 'Show More'}
+            </button>
+          </div>
+        )}
       </section>
 
       <Footer />

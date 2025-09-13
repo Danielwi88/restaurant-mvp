@@ -62,7 +62,7 @@ export default function Navbar() {
   const avatarUrl = user?.avatarUrl ?? user?.avatar ?? null;
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b">
+    <header className="sticky top-0 z-50 bg-white/20 backdrop-blur border-b">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="font-semibold text-lg flex items-center gap-2">
           <span className="inline-block size-6 rounded-full bg-[var(--color-brand,#D22B21)]" /> Foody
