@@ -1,21 +1,28 @@
 import Navbar from "@/components/Navbar";
 import { useRestaurants, useRecommendedRestaurants } from "@/services/queries/restaurants";
+import { useMenus } from "@/services/queries/menus";
 import { useAppDispatch, useAppSelector } from "@/features/store";
 import type { RootState } from "@/features/store";
-import { setQuery } from "@/features/filters/filtersSlice";
+import { setQuery, setSort } from "@/features/filters/filtersSlice";
+import type { FiltersState } from "@/features/filters/filtersSlice";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import Footer from "@/components/Footer";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function Home() {
   const f = useAppSelector((s: RootState) => s.filters);
   const d = useAppDispatch();
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  const { data: rec, isLoading: recLoading, isError: recError } = useRecommendedRestaurants({ enabled: !!token });
-  const { data: restaurants, isLoading, isError } = useRestaurants({ q: f.q, page: 1, limit: 20 });
-  const showRecs = !!token && !!rec && !recError;
+  const qDebounced = useDebounce(f.q, 350);
+  const hasQueryRaw = (f.q ?? "").trim().length > 0;
+  const hasQuery = (qDebounced ?? "").trim().length > 0;
+  const { data: rec, isLoading: recLoading, isError: recError } = useRecommendedRestaurants({ enabled: !!token && !hasQueryRaw });
+  const { data: restaurants, isLoading, isError, isFetching } = useRestaurants({ q: qDebounced, page: 1, limit: 20, sort: f.sort });
+  const { data: menuItems, isLoading: menuLoading, isFetching: menuFetching, isError: menuError } = useMenus({ q: qDebounced, page: 1, limit: 12 });
+  const showRecs = !!token && !!rec && !recError && !hasQueryRaw;
 
   return (
     <>
@@ -23,15 +30,12 @@ export default function Home() {
       {/* Hero area with image background and overlay */}
       <section
         className="relative text-white"
-        // style={{
-        //   backgroundImage:
-        //     "linear-gradient(to bottom, rgba(0,0,0,.55), rgba(0,0,0,.55)), url('/burger-home.png')",
-        //   backgroundSize: 'cover',
-        //   backgroundPosition: 'center',
-        // }}
+        
       >
         <img src="/burger-home.png" alt="burger-home" aria-hidden='true' role='presentation' className="absolute inset-0 -z-10 h-[827px] w-full object-cover" fetchPriority='high' decoding='async' />
-        <div className="absolute inset-0 -z-10 bg-black/55"/>
+        <div
+          className="absolute h-[827px] inset-0 -z-10 bg-[linear-gradient(180deg,_rgba(0,0,0,0)_-59.98%,_rgba(0,0,0,0.80)_110.09%)]"
+        />
 
         <div className="max-w-6xl mx-auto px-4 py-20">
           <h1 className="text-[40px] leading-[48px] md:text-[60px] md:leading-[72px] font-extrabold tracking-[-0.02em] drop-shadow">
@@ -72,16 +76,31 @@ export default function Home() {
         </div>
 
         {(showRecs ? recLoading : isLoading) && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
             {Array.from({length:8}).map((_,i)=><Skeleton key={i} className="h-56 rounded-xl" />)}
           </div>
         )}
         {(showRecs ? recError : isError) && <div className="mt-6 text-red-600">Failed to load restaurants.</div>}
         <div className="mt-8 flex items-center justify-between">
           <h2 className="text-xl font-semibold">{showRecs ? 'Recommended' : 'Restaurants'}</h2>
+          <div className="flex items-center gap-3">
+            {!showRecs && (
+              <select
+                value={f.sort ?? 'rating_desc'}
+                onChange={(e)=>d(setSort(e.target.value as FiltersState['sort']))}
+                className="border rounded-md text-sm px-2 py-1 bg-white"
+                aria-label="Sort restaurants"
+              >
+                <option value="rating_desc">Top Rated</option>
+              </select>
+            )}
+            {!showRecs && (isFetching || (hasQueryRaw && !hasQuery)) && (
+              <span className="text-sm text-zinc-500"> Searching…</span>
+            )}
+          </div>
         </div>
         {(showRecs ? rec : restaurants) && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
             {(showRecs ? rec! : restaurants!).map(r => (
               <Link key={r.id} to={`/restaurant/${r.id}`}>
                 <Card className="overflow-hidden shadow-sm border border-neutral-200">
@@ -105,6 +124,44 @@ export default function Home() {
                 </Card>
               </Link>
             ))}
+          </div>
+        )}
+        {/* Menu items section appears only when searching */}
+        {hasQueryRaw && (
+          <>
+            <div className="mt-10 flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Menu Items</h2>
+              {(menuFetching || (hasQueryRaw && !hasQuery)) && (
+                <span className="text-sm text-zinc-500"> Searching…</span>
+              )}
+            </div>
+            {menuLoading && (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+                {Array.from({length:8}).map((_,i)=><Skeleton key={i} className="h-56 rounded-xl" />)}
+              </div>
+            )}
+            {menuError && <div className="mt-6 text-red-600">Failed to load menu items.</div>}
+            {menuItems && (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+                {menuItems.map((m) => (
+                  <Card key={m.id} className="overflow-hidden shadow-sm border border-neutral-200">
+                    <CardContent className="p-0">
+                      <img src={m.imageUrl || '/fallback1.png'} alt={m.name} className="h-36 w-full object-cover" onError={(e)=>{ const img=e.currentTarget; if(!img.src.includes('/fallback1.png')){img.onerror=null; img.src='/fallback1.png';}}} />
+                      <div className="p-4">
+                        <div className="font-semibold">{m.name}</div>
+                        <div className="mt-1 text-sm text-zinc-600">IDR {new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(m.price)}</div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {!showRecs && !isLoading && (restaurants?.length ?? 0) === 0 && (!hasQueryRaw || (menuItems?.length ?? 0) === 0) && (
+          <div className="mt-6 text-zinc-600">
+            No results for "{qDebounced}". Try a different keyword.
           </div>
         )}
         <div className="text-center mt-8">

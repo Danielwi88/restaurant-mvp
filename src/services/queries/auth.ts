@@ -26,13 +26,24 @@ export const useLogin = () =>
       onSuccess: (d) => {
         const token = extractToken(d);
         if (token) localStorage.setItem("token", token);
-        // Persist user (best-effort, unknown shape)
+        // Persist user (best-effort, unknown shape, no `any`)
         if (d && typeof d === 'object') {
-          try {
-            const anyD = d as any;
-            const user = anyD.data?.user ?? anyD.user ?? null;
-            if (user) localStorage.setItem("user", JSON.stringify(user));
-          } catch {}
+          const root = d as Record<string, unknown>;
+          const dataField = root.data;
+          let user: unknown = undefined;
+          if (dataField && typeof dataField === 'object') {
+            user = (dataField as Record<string, unknown>).user;
+          }
+          if (user === undefined && "user" in root) {
+            user = (root as Record<string, unknown>).user;
+          }
+          if (user !== undefined) {
+            try {
+              localStorage.setItem("user", JSON.stringify(user));
+            } catch (err) {
+              if (import.meta.env.DEV) console.warn("[auth] Persist user failed", err);
+            }
+          }
         }
         qc.invalidateQueries();
       },

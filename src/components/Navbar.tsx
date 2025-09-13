@@ -16,10 +16,12 @@ import { useEffect, useState } from "react";
 import { LogOutIcon, MapPinIcon, ReceiptIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
+type StoredUser = { name?: string; avatar?: string; avatarUrl?: string };
+
 export default function Navbar() {
   const count = useAppSelector((s: RootState) => s.cart.items.reduce((a, b) => a + b.qty, 0));
   const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<{ name?: string; avatar?: string } | null>(null);
+  const [user, setUser] = useState<StoredUser | null>(null);
   const nav = useNavigate();
   const qc = useQueryClient();
 
@@ -28,8 +30,23 @@ export default function Navbar() {
     setToken(t);
     try {
       const raw = localStorage.getItem('user');
-      if (raw) setUser(JSON.parse(raw));
-    } catch {}
+      if (raw) {
+        const parsed: unknown = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          const obj = parsed as Record<string, unknown>;
+          const v: StoredUser = {
+            name: typeof obj.name === 'string' ? obj.name : undefined,
+            avatar: typeof obj.avatar === 'string' ? obj.avatar : undefined,
+            avatarUrl: typeof (obj as { avatarUrl?: unknown }).avatarUrl === 'string'
+              ? (obj as { avatarUrl?: unknown }).avatarUrl as string
+              : undefined,
+          };
+          setUser(v);
+        }
+      }
+    } catch (err) {
+      if (import.meta.env.DEV) console.warn('[navbar] Failed to parse user from storage', err);
+    }
   }, []);
 
   const logout = () => {
@@ -42,7 +59,7 @@ export default function Navbar() {
   };
 
   const name = user?.name || 'John Doe';
-  const avatarUrl = (user as any)?.avatarUrl || (user as any)?.avatar || null;
+  const avatarUrl = user?.avatarUrl ?? user?.avatar ?? null;
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b">

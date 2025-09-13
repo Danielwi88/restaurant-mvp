@@ -9,7 +9,18 @@ export default function ProductCard({ item }: { item: MenuItem }) {
   const d = useAppDispatch();
   return (
     <Card className="overflow-hidden">
-      <img src={item.imageUrl} alt={item.name} className="h-36 w-full object-cover" />
+      <img
+        src={item.imageUrl || "/fallback1.png"}
+        alt={item.name}
+        className="h-36 w-full object-cover"
+        onError={(e) => {
+          const img = e.currentTarget as HTMLImageElement
+          if (!img.src.includes("/fallback1.png")) {
+            img.onerror = null
+            img.src = "/fallback1.png"
+          }
+        }}
+      />
       <CardContent className="p-4">
         <div className="font-medium">{item.name}</div>
         <div className="text-[var(--color-brand,#D22B21)] font-semibold">{formatCurrency(item.price)}</div>
