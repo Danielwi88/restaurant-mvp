@@ -67,11 +67,10 @@ export const useMenus = (params?: { restaurantId?:string; q?:string; category?:s
         })
         .slice(0, q ? 12 : 6);
 
-      // Some restaurant IDs might not support certain params. Fetch defensively and ignore failures.
-      // When searching by keyword, request more menu items per restaurant to improve recall
+     
       const detailParams = { limitMenu: q ? Math.max(30, limit) : limit, limitReview: 6 } as Record<string, unknown>;
       const items: MenuItem[] = [];
-      // Fetch details in batches to avoid overwhelming the API
+     
       for (const group of chunk(ordered, 12)) {
         const detailResults = await Promise.allSettled(
           group.map((rid) => apiGet<RestoDetailResponse>(`resto/${rid}`, detailParams))

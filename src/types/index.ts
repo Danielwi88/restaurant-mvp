@@ -12,7 +12,7 @@ export type Restaurant = {
   coords?: { lat: number; long: number };
 };
 
-export type CartItem = { id: string; name: string; price: number; qty: number; imageUrl?: string; restaurantId?: string; };
+export type CartItem = { id: string; name: string; price: number; qty: number; imageUrl?: string; restaurantId?: string; serverCartItemId?: string };
 
 export type Order = {
   id: string; items: CartItem[]; total: number;

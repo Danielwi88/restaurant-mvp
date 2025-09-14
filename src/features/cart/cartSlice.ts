@@ -12,12 +12,22 @@ const slice = createSlice({
   reducers: {
     addToCart: (s, a:PayloadAction<CartItem>) => {
       const f = s.items.find(i=>i.id===a.payload.id);
-      if (f) f.qty += a.payload.qty; else s.items.push(a.payload);
+      if (f) {
+        f.qty += a.payload.qty;
+        if (!f.serverCartItemId && a.payload.serverCartItemId) {
+          (f as CartItem).serverCartItemId = a.payload.serverCartItemId;
+        }
+      } else s.items.push(a.payload);
       save("cart", s);
     },
     updateQty: (s, a:PayloadAction<{id:string;qty:number}>) => {
       const it = s.items.find(i=>i.id===a.payload.id);
       if (it) it.qty = Math.max(1, a.payload.qty);
+      save("cart", s);
+    },
+    setServerCartItemId: (s, a:PayloadAction<{id:string; serverCartItemId?: string}>) => {
+      const it = s.items.find(i=>i.id===a.payload.id);
+      if (it) (it as any).serverCartItemId = a.payload.serverCartItemId;
       save("cart", s);
     },
     removeFromCart: (s, a:PayloadAction<string>) => {
@@ -26,5 +36,5 @@ const slice = createSlice({
     clearCart: (s) => { s.items = []; save("cart", s); }
   }
 });
-export const { addToCart, updateQty, removeFromCart, clearCart } = slice.actions;
+export const { addToCart, updateQty, removeFromCart, clearCart, setServerCartItemId } = slice.actions;
 export default slice.reducer;

@@ -1,5 +1,5 @@
 // src/components/Navbar.tsx
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAppSelector } from "@/features/store";
 import { Button } from "@/components/ui/button";
 import type { RootState } from "@/features/store";
@@ -23,7 +23,10 @@ export default function Navbar() {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<StoredUser | null>(null);
   const nav = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === "/";
   const qc = useQueryClient();
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const t = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -49,6 +52,16 @@ export default function Navbar() {
     }
   }, []);
 
+  // Make navbar transparent with blur at top, turn white on scroll
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(typeof window !== 'undefined' ? window.scrollY > 4 : false);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -62,9 +75,22 @@ export default function Navbar() {
   const avatarUrl = user?.avatarUrl ?? user?.avatar ?? null;
 
   return (
-    <header className="sticky top-0 z-50 bg-white/20 backdrop-blur border-b">
+    <header
+      className={
+        `sticky top-0 z-50 transition-all duration-300 backdrop-blur-xs ${
+          scrolled
+            ? 'bg-white/90 supports-[backdrop-filter]:bg-white/80 border-none border-neutral-200 shadow-sm'
+            : 'bg-transparent border-transparent '
+        }`
+      }
+    >
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="font-semibold text-lg flex items-center gap-2">
+        <Link
+          to="/"
+          className={`font-semibold text-lg flex items-center gap-2 transition-colors ${
+            scrolled ? 'text-zinc-900' : (isHome ? 'text-white' : 'text-zinc-900')
+          }`}
+        >
           <span className="inline-block size-6 rounded-full bg-[var(--color-brand,#D22B21)]" /> Foody
         </Link>
         <div className="flex items-center gap-3">

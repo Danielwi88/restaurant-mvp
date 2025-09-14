@@ -99,8 +99,7 @@ export default function Home() {
       <Navbar/>
       {/* Hero area with image background and overlay */}
       <section
-        className="relative text-white"
-        
+        className="relative text-white -mt-16"
       >
         <img src="/burger-home.png" alt="burger-home" aria-hidden='true' role='presentation' className="absolute inset-0 -z-10 h-[827px] w-full object-cover" fetchPriority='high' decoding='async' />
         <div
