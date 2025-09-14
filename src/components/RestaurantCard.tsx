@@ -6,9 +6,11 @@ import { distanceKm, formatKm } from "@/lib/geo";
 import { useRestaurant } from "@/services/queries/restaurants";
 
 export default function RestaurantCard({ restaurant, userPos }: { restaurant: Restaurant; userPos?: LatLong }) {
-  // Hydrate missing coordinates from detail API when not present in list
+  // Hydrate missing coordinates from detail API only when authenticated
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const needsCoords = !restaurant.coords;
-  const { data } = useRestaurant(needsCoords ? restaurant.id : undefined);
+  const canFetchDetail = !!token && needsCoords;
+  const { data } = useRestaurant(canFetchDetail ? restaurant.id : undefined);
   const hydrated = data?.restaurant;
   const coords = restaurant.coords ?? hydrated?.coords;
   const km = userPos && coords ? distanceKm(userPos, coords) : restaurant.distanceKm ?? hydrated?.distanceKm;
@@ -38,4 +40,3 @@ export default function RestaurantCard({ restaurant, userPos }: { restaurant: Re
     </Link>
   );
 }
-

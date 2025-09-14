@@ -45,6 +45,12 @@ export const useLogin = () =>
             }
           }
         }
+        // Notify app that auth state changed so views can react
+        try {
+          window.dispatchEvent(new Event("auth:changed"));
+        } catch (_) {
+          // no-op in non-DOM environments
+        }
         qc.invalidateQueries();
       },
     });

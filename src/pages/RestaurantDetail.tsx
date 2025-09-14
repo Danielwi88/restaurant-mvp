@@ -24,14 +24,14 @@ export default function RestaurantDetail() {
   const { id } = useParams();
   const { data, isLoading, isFetching } = useRestaurant(id, { limitMenu: 10, limitReview: 6 });
   const d = useAppDispatch();
-  const r = data?.restaurant;
+  const restaurant = data?.restaurant;
   const menuData = data?.sampleMenus;
   const menu = useMemo(() => menuData ?? [], [menuData]);
   const reviews = (data as unknown as { reviews?: Array<{ id: string | number; star?: number; rating?: number; comment?: string; createdAt?: string; user?: { id?: string | number; name?: string; avatar?: string; avatarUrl?: string } }> })?.reviews ?? [];
 
   const [activeTab, setActiveTab] = useState<"ALL" | "FOOD" | "DRINK">("ALL");
 
-  const banners = r?.bannerUrls;
+  const banners = restaurant?.bannerUrls;
   const images = useMemo(() => {
     const imgs = banners?.filter(Boolean) ?? [];
     return imgs.length > 0 ? imgs : ["/burger-home.png"];
@@ -57,7 +57,7 @@ export default function RestaurantDetail() {
   // Distance text based on cached user location
   const distText = (() => {
     const user = getCachedGeo();
-    const km = user && r?.coords ? distanceKm(user, r.coords) : r?.distanceKm;
+    const km = user && restaurant?.coords ? distanceKm(user, restaurant.coords) : restaurant?.distanceKm;
     return formatKm(km);
   })();
 
@@ -155,7 +155,7 @@ export default function RestaurantDetail() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <img
             src={collage[0]}
-            alt={r?.name}
+            alt={restaurant?.name}
             className="md:col-span-2 h-64 md:h-80 lg:h-96 w-full object-cover rounded-2xl"
             onError={(e)=>{ const img=e.currentTarget; if (!img.src.endsWith(HERO_FALLBACKS[0])) { img.onerror=null; img.src=HERO_FALLBACKS[0]; }}}
           />
@@ -187,17 +187,17 @@ export default function RestaurantDetail() {
         <div className="mt-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Avatar className="size-14">
-              <AvatarImage src={r?.logoUrl} alt={r?.name} />
-              <AvatarFallback className="text-zinc-700">{(r?.name ?? "?").slice(0,2)}</AvatarFallback>
+              <AvatarImage src={restaurant?.logoUrl} alt={restaurant?.name} />
+              <AvatarFallback className="text-zinc-700">{(restaurant?.name ?? "?").slice(0,2)}</AvatarFallback>
             </Avatar>
             <div>
-              <div className="text-2xl font-semibold">{r?.name}</div>
+              <div className="text-2xl font-semibold">{restaurant?.name}</div>
               <div className="mt-1 flex items-center gap-2 text-sm text-zinc-600">
                 <StarIcon className="size-4 text-yellow-500" />
-                <span>{r?.rating ?? 4.9}</span>
+                <span>{restaurant?.rating ?? 4.9}</span>
                 <span className="text-zinc-400">•</span>
                 <MapPinIcon className="size-4" />
-                <span>{r?.address ?? "Jakarta Selatan"}{distText ? ` · ${distText}` : ""}</span>
+                <span>{restaurant?.address ?? "Jakarta Selatan"}{distText ? ` · ${distText}` : ""}</span>
               </div>
             </div>
           </div>
@@ -206,7 +206,7 @@ export default function RestaurantDetail() {
             <Button
               variant="outline"
               className="rounded-full ml-3"
-              onClick={() => d(openModal({ id: "share", payload: { title: r?.name, url: typeof window !== 'undefined' ? window.location.href : undefined } }))}
+              onClick={() => d(openModal({ id: "share", payload: { title: restaurant?.name, url: typeof window !== 'undefined' ? window.location.href : undefined } }))}
             >
               <Share2Icon /> Share
             </Button>
@@ -248,7 +248,7 @@ export default function RestaurantDetail() {
           <h2 className="text-xl font-semibold">Review</h2>
           <div className="flex items-center gap-1 text-sm text-zinc-700">
             <StarIcon className="size-4 text-yellow-500" />
-            <span>{r?.rating ?? 4.9}</span>
+            <span>{restaurant?.rating ?? 4.9}</span>
           </div>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">

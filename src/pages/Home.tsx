@@ -19,21 +19,46 @@ import RestaurantCard from "@/components/RestaurantCard";
 export default function Home() {
   const f = useAppSelector((s: RootState) => s.filters);
   const d = useAppDispatch();
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const [token, setToken] = useState<string | null>(() => (typeof window !== 'undefined' ? localStorage.getItem('token') : null));
   const qDebounced = useDebounce(f.q, 350);
   const hasQueryRaw = (f.q ?? "").trim().length > 0;
   const hasQuery = (qDebounced ?? "").trim().length > 0;
-  const pageSize = 20;
+  const [pageSize, setPageSize] = useState(12);
   const [page, setPage] = useState(1);
   const [acc, setAcc] = useState<Restaurant[]>([]);
   const [hasMore, setHasMore] = useState(true);
+  const [forceList, setForceList] = useState(false);
 
-  const { data: rec, isLoading: recLoading, isError: recError } = useRecommendedRestaurants({ enabled: !!token && !hasQueryRaw });
+  const recModeDesired = !!token && !hasQueryRaw;
+  const recModeActive = recModeDesired && !forceList;
+  const { data: rec, isLoading: recLoading, isError: recError } = useRecommendedRestaurants({ enabled: recModeActive });
   const { data: restaurants, isLoading, isError, isFetching } = useRestaurants({ q: qDebounced, page, limit: pageSize, sort: f.sort });
   const { data: menuItems, isLoading: menuLoading, isFetching: menuFetching, isError: menuError } = useMenus({ q: qDebounced, page: 1, limit: 12 });
-  const showRecs = !!token && !!rec && !recError && !hasQueryRaw;
+  const showRecs = recModeActive && !!rec && !recError;
   const geo = useGeolocation();
   const [recCount, setRecCount] = useState(16);
+
+  // React to login/logout without manual refresh
+  useEffect(() => {
+    const refreshToken = () => {
+      try {
+        setToken(typeof window !== 'undefined' ? localStorage.getItem('token') : null);
+      } catch {
+        setToken(null);
+      }
+    };
+    // Custom event fired from auth.ts on login success
+    window.addEventListener('auth:changed', refreshToken);
+    // Also update when tab gains focus (covers some edge cases)
+    window.addEventListener('focus', refreshToken);
+    // Cross-tab login via storage event
+    window.addEventListener('storage', refreshToken);
+    return () => {
+      window.removeEventListener('auth:changed', refreshToken);
+      window.removeEventListener('focus', refreshToken);
+      window.removeEventListener('storage', refreshToken);
+    };
+  }, []);
 
   // Reset pagination on query/sort change
   useEffect(() => {
@@ -44,7 +69,7 @@ export default function Home() {
 
   // Accumulate non-recommended pages
   useEffect(() => {
-    if (showRecs) return;
+    if (recModeActive) return;
     if (!restaurants) return;
     setAcc(prev => {
       const merged = page === 1 ? restaurants : [...prev, ...restaurants];
@@ -58,16 +83,16 @@ export default function Home() {
       return uniq;
     });
     if (restaurants.length < pageSize) setHasMore(false);
-  }, [restaurants, page, showRecs]);
+  }, [restaurants, page, pageSize, recModeActive]);
 
   // Reset recommended visible count when switching modes
-  useEffect(() => { if (showRecs) setRecCount(16); }, [showRecs]);
+  useEffect(() => { if (recModeActive) setRecCount(16); }, [recModeActive]);
 
   const list = useMemo(() => (
-    showRecs
+    recModeActive
       ? ((rec ?? []).slice(0, recCount))
       : (acc.length ? acc : (restaurants ?? []))
-  ), [showRecs, rec, recCount, acc, restaurants]);
+  ), [recModeActive, rec, recCount, acc, restaurants]);
 
   return (
     <>
@@ -131,21 +156,30 @@ export default function Home() {
           })}
         </div>
 
-        {(showRecs ? recLoading : isLoading) && (
+        {(recModeActive ? recLoading : isLoading) && (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
             {Array.from({length:8}).map((_,i)=><Skeleton key={i} className="h-56 rounded-xl" />)}
           </div>
         )}
-        {(showRecs ? recError : isError) && <div className="mt-6 text-red-600">Failed to load restaurants.</div>}
+        {(recModeActive ? recError : isError) && <div className="mt-6 text-red-600">Failed to load restaurants.</div>}
         <div className="mt-8 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">{showRecs ? 'Recommended' : 'Restaurants'}</h2>
+          <h2 className="text-xl font-semibold">{recModeActive ? 'Recommended' : 'Restaurants'}</h2>
           <div className="flex items-center gap-3">
-            {showRecs && (
-              <Link to="/categories" className="text-sm font-medium text-red-600 hover:underline">
+            {recModeActive && (
+              <button
+                className="text-sm font-medium text-red-600 hover:underline"
+                onClick={() => {
+                  setForceList(true);
+                  setPageSize(12);
+                  setPage(1);
+                  setAcc([]);
+                  setHasMore(true);
+                }}
+              >
                 See All
-              </Link>
+              </button>
             )}
-            {!showRecs && (
+            {!recModeActive && (
               <select
                 value={f.sort ?? 'rating_desc'}
                 onChange={(e)=>d(setSort(e.target.value as FiltersState['sort']))}
@@ -155,7 +189,7 @@ export default function Home() {
                 <option value="rating_desc">Top Rated</option>
               </select>
             )}
-            {!showRecs && (isFetching || (hasQueryRaw && !hasQuery)) && (
+            {!recModeActive && (isFetching || (hasQueryRaw && !hasQuery)) && (
               <span className="text-sm text-zinc-500"> Searching…</span>
             )}
           </div>
@@ -219,7 +253,7 @@ export default function Home() {
             No results for "{qDebounced}". Try a different keyword.
           </div>
         )}
-        {showRecs && rec && list.length < (rec?.length ?? 0) && (
+        {recModeActive && rec && list.length < (rec?.length ?? 0) && (
           <div className="text-center mt-8">
             <button
               className="px-4 py-2 rounded-full border border-neutral-300 bg-white shadow-sm"
@@ -229,7 +263,7 @@ export default function Home() {
             </button>
           </div>
         )}
-        {!showRecs && list && list.length > 0 && hasMore && (
+        {!recModeActive && list && list.length > 0 && hasMore && (
           <div className="text-center mt-8">
             <button
               className="px-4 py-2 rounded-full border border-neutral-300 bg-white shadow-sm disabled:opacity-60"

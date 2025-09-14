@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { apiGet, API_ORIGIN } from "../api/axios";
 import type { Restaurant, MenuItem } from "../../types";
 
@@ -68,7 +68,23 @@ function mapRestaurant(api: RestaurantApi): Restaurant {
   const lat = api.coordinates?.lat ?? api.coordinates?.latitude ?? api.lat ?? api.latitude;
   const lng = api.coordinates?.long ?? api.coordinates?.lng ?? api.coordinates?.longitude ?? api.long ?? api.lng ?? api.lon ?? api.longitude;
   const distRaw = (api as unknown as Record<string, unknown>);
-  const distCandidate = distRaw?.distance ?? distRaw?.distanceKm ?? (distRaw as any)?.distance_km ?? (distRaw as any)?.distanceKM ?? (distRaw as any)?.distanceInKm ?? (distRaw as any)?.distance_in_km;
+  const distCandidateUnknown = (() => {
+    // Probe various API field names without using `any`
+    const keys = [
+      "distance",
+      "distanceKm",
+      "distance_km",
+      "distanceKM",
+      "distanceInKm",
+      "distance_in_km",
+    ] as const;
+    for (const k of keys) {
+      const v = distRaw[k as unknown as string];
+      if (v != null) return v;
+    }
+    return undefined as unknown;
+  })();
+  const distCandidate = distCandidateUnknown != null ? Number(distCandidateUnknown as number) : undefined;
   return {
     id: String(api.id),
     name: api.name,
@@ -160,9 +176,47 @@ export const useRecommendedRestaurants = (options?: { enabled?: boolean }) =>
   useQuery({
     queryKey: ["restaurants", "recommended"],
     enabled: options?.enabled ?? true,
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       const res = await apiGet<RestoRecommendedResponse>("resto/recommended");
       const list = res?.data?.recommendations ?? [];
       return list.map(mapRestaurant) as Restaurant[];
     },
+  });
+
+export const useInfiniteRestaurants = (params?: { q?:string; limit?:number; rating?:number; priceMin?:number; priceMax?:number; sort?: 'rating_desc' | 'price_asc' | 'price_desc' | 'newest' }) =>
+  useInfiniteQuery({
+    queryKey: ["restaurants", "infinite", params],
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: { items: Restaurant[]; hasMore: boolean }, _pages, lastPageParam) =>
+      lastPage.hasMore ? (Number(lastPageParam) + 1) : undefined,
+    placeholderData: (prev) => prev,
+    queryFn: async ({ pageParam }) => {
+      const limit = params?.limit ?? 8;
+      const qp: Record<string, unknown> = {
+        page: pageParam,
+        limit,
+        rating: params?.rating,
+        priceMin: params?.priceMin,
+        priceMax: params?.priceMax,
+      };
+      const query = params?.q?.trim();
+      if (query) {
+        qp.q = query;
+        qp.location = query;
+      }
+      const res = await apiGet<RestoListResponse>("resto", qp);
+      const list = (res?.data?.restaurants ?? []).map(mapRestaurant) as Restaurant[];
+      // Client-side fallbacks: filter + sort
+      let out = list;
+      if (query) {
+        const ql = query.toLowerCase();
+        out = out.filter((r) => (r.name?.toLowerCase().includes(ql) || r.address?.toLowerCase().includes(ql)));
+      }
+      if (params?.sort === 'rating_desc') {
+        out = [...out].sort((a,b) => (b.rating ?? 0) - (a.rating ?? 0));
+      }
+      const hasMore = out.length >= limit;
+      return { items: out, hasMore } as { items: Restaurant[]; hasMore: boolean };
+    }
   });
