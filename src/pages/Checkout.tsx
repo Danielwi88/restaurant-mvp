@@ -12,7 +12,7 @@ import type { RootState } from "@/features/store";
 import { removeFromCart, updateQty, setServerCartItemId } from "@/features/cart/cartSlice";
 import { MapPinIcon, MinusIcon, PlusIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useAddCartItem, useRemoveCartItem } from "@/services/queries/orders";
+import { useAddCartItem, useRemoveCartItem, type AddCartResponse } from "@/services/queries/orders";
 import { showToast } from "@/lib/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -156,8 +156,8 @@ export default function Checkout() {
                                     menuId: Number.isFinite(mnum) ? mnum : i.id,
                                     quantity: nextQty,
                                   }, {
-                                    onSuccess: (res) => {
-                                      const newId = (res as any)?.data?.cartItem?.id;
+                                    onSuccess: (res: AddCartResponse) => {
+                                      const newId = res?.data?.cartItem?.id;
                                       if (newId) d(setServerCartItemId({ id: i.id, serverCartItemId: String(newId) }));
                                     },
                                     onError: () => {

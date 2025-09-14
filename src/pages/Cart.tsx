@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "@/features/store";
 import type { RootState } from "@/features/store";
 import { updateQty, removeFromCart, setServerCartItemId } from "@/features/cart/cartSlice";
-import { useAddCartItem, useRemoveCartItem } from "@/services/queries/orders";
+import { useAddCartItem, useRemoveCartItem, type AddCartResponse } from "@/services/queries/orders";
 import { showToast } from "@/lib/toast";
 import { formatCurrency } from "@/lib/format";
 import { Card, CardContent } from "@/components/ui/card";
@@ -60,8 +60,8 @@ export default function CartPage() {
                       menuId: Number.isFinite(mnum) ? mnum : id,
                       quantity: nextQty,
                     }, {
-                      onSuccess: (res) => {
-                        const newId = (res as any)?.data?.cartItem?.id;
+                      onSuccess: (res: AddCartResponse) => {
+                        const newId = res?.data?.cartItem?.id;
                         if (newId) d(setServerCartItemId({ id, serverCartItemId: String(newId) }));
                       },
                       onError: () => {

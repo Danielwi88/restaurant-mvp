@@ -15,7 +15,7 @@ const slice = createSlice({
       if (f) {
         f.qty += a.payload.qty;
         if (!f.serverCartItemId && a.payload.serverCartItemId) {
-          (f as CartItem).serverCartItemId = a.payload.serverCartItemId;
+          f.serverCartItemId = a.payload.serverCartItemId;
         }
       } else s.items.push(a.payload);
       save("cart", s);
@@ -27,7 +27,7 @@ const slice = createSlice({
     },
     setServerCartItemId: (s, a:PayloadAction<{id:string; serverCartItemId?: string}>) => {
       const it = s.items.find(i=>i.id===a.payload.id);
-      if (it) (it as any).serverCartItemId = a.payload.serverCartItemId;
+      if (it) it.serverCartItemId = a.payload.serverCartItemId;
       save("cart", s);
     },
     removeFromCart: (s, a:PayloadAction<string>) => {
