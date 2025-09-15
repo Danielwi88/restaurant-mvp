@@ -52,5 +52,7 @@ export const apiGet = <T>(url: string, params?: unknown) =>
   axios.get<T>(url, { params }).then(r => r.data);
 export const apiPost = <T>(url: string, data?: unknown) =>
   axios.post<T>(url, data).then(r => r.data);
+export const apiPut = <T>(url: string, data?: unknown) =>
+  axios.put<T>(url, data).then(r => r.data);
 export const apiDelete = <T>(url: string) =>
   axios.delete<T>(url).then(r => r.data);

@@ -69,6 +69,7 @@ export default function RestaurantDetail() {
     </span>
   );
 
+
   return (
     <>
       <Navbar/>
@@ -232,7 +233,7 @@ export default function RestaurantDetail() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           {filteredMenu.map((m) => (
-            <ProductCard key={m.id} item={m} />
+            <ProductCard key={m.id} item={m} localOnly />
           ))}
         </div>
 
@@ -288,6 +289,7 @@ export default function RestaurantDetail() {
           </>
         )}
       </div>
+      
     </>
   );
 }

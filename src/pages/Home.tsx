@@ -99,22 +99,22 @@ export default function Home() {
       <Navbar/>
       {/* Hero area with image background and overlay */}
       <section
-        className="relative text-white -mt-16"
+        className="relative text-white -mt-20"
       >
-        <img src="/burger-home.png" alt="burger-home" aria-hidden='true' role='presentation' className="absolute inset-0 -z-10 h-[827px] w-full object-cover" fetchPriority='high' decoding='async' />
+        <img src="/burger-home.png" alt="burger-home" aria-hidden='true' role='presentation' className="absolute inset-0 -z-10 h-[648px] xs:h-[668px] sm:h-[827px] w-full object-cover" fetchPriority='high' decoding='async' />
         <div
-          className="absolute h-[827px] inset-0 -z-10 bg-[linear-gradient(180deg,_rgba(0,0,0,0)_-59.98%,_rgba(0,0,0,0.80)_110.09%)]"
+          className="absolute inset-0 -z-10 h-[648px] xs:h-[668px] sm:h-[827px] bg-[linear-gradient(180deg,_rgba(0,0,0,0)_-59.98%,_rgba(0,0,0,0.80)_110.09%)]"
         />
 
-        <div className="max-w-6xl mx-auto px-4 py-20">
-          <h1 className="text-[40px] leading-[48px] md:text-[60px] md:leading-[72px] font-extrabold tracking-[-0.02em] drop-shadow">
+        <div className="max-w-[1200px] mx-auto sm:px-0 px-4 py-20">
+          <h1 className="text-center text-[40px] leading-[48px] md:text-[60px] md:leading-[72px] font-extrabold tracking-[-0.02em] drop-shadow mt-[146px] sm:mt-[246px]">
             Explore Culinary Experiences
           </h1>
-          <p className="max-w-2xl mt-3 text-white/90">
+          <p className="max-w-2xl mx-auto mt-3 text-center text-white/90">
             Search and refine your choice to discover the perfect restaurant.
           </p>
-          <div className="max-w-2xl mt-8">
-            <div className="bg-white rounded-full p-1.5 shadow-md flex items-center">
+          <div className="max-w-[1200px] place-items-center mt-8">
+            <div className="bg-white w-full mx-[22px] sm:mx-auto md:w-[604px] flex justify-center rounded-full p-1.5 shadow-md items-center">
               <Input
                 className="rounded-full border-0 focus-visible:ring-[3px] text-zinc-800"
                 placeholder="Search restaurants, food and drink"
@@ -126,9 +126,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="max-w-6xl mx-auto mt-120 px-4 py-10">
+      <section className="max-w-[1200px] mx-auto px-4 sm:px-0  mt-[130px] xs:mt-[148px] xm:mt-[208px] sm:mt-[288px]">
         {/* Categories row */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
           {[
             { label: 'All Restaurant', image: '/Categoryall.png', to: '/categories' },
             { label: 'Nearby',        image: '/location.png' },
@@ -138,12 +138,16 @@ export default function Home() {
             { label: 'Lunch',         image: '/lunch.png' },
           ].map((c)=> {
             const content = (
-              <div className="rounded-xl bg-white border border-neutral-200 shadow-sm p-4 flex items-center gap-3">
-                <div className="size-12 grid place-items-center rounded-lg bg-[var(--gray-100)] overflow-hidden">
-                  <img src={c.image} alt={c.label} className="w-9 h-9 object-contain" onError={(e)=>{ const img=e.currentTarget; if(!img.src.includes('/fallback1.png')){ img.onerror=null; img.src='/fallback1.png'; }}} />
+              <div>
+
+              <div className="rounded-2xl bg-white shadow-sm p-4 h-25 flex flex-col object-cover items-center gap-3">
+                <div className="size-12 sm:size-[65px] grid place-items-center rounded-lg bg-white overflow-hidden">
+                  <img src={c.image} alt={c.label} className="w-full h-full object-contain" onError={(e)=>{ const img=e.currentTarget; if(!img.src.includes('/fallback1.png')){ img.onerror=null; img.src='/fallback1.png'; }}} />
                 </div>
-                <div className="text-sm font-medium text-zinc-800">{c.label}</div>
               </div>
+                <div className="text-center text-sm font-bold leading-[28px] text-zinc-800">{c.label}</div>
+              </div>
+              
             );
             return c.to ? (
               <Link key={c.label} to={c.to} aria-label={c.label}>
@@ -194,7 +198,7 @@ export default function Home() {
           </div>
         </div>
         {list && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-y-7 gap-4 sm:gap-5 mt-6">
             {list.map((r) => (
               <RestaurantCard key={r.id} restaurant={r} userPos={geo.position ?? undefined} />
             ))}

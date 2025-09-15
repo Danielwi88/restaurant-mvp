@@ -5,14 +5,14 @@ import { cn } from "@/lib/utils";
 type Ctx = {
   open: boolean;
   setOpen: (v: boolean) => void;
-  triggerRef: React.RefObject<HTMLElement>;
+  triggerRef: React.RefObject<HTMLElement | null>;
 };
 
 const MenuCtx = React.createContext<Ctx | null>(null);
 
 export function DropdownMenu({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
-  const triggerRef = React.useRef<HTMLElement>(null);
+  const triggerRef = React.useRef<HTMLElement | null>(null);
   const value = React.useMemo(() => ({ open, setOpen, triggerRef }), [open]);
   return <MenuCtx.Provider value={value}>{children}</MenuCtx.Provider>;
 }
@@ -20,14 +20,14 @@ export function DropdownMenu({ children }: { children: React.ReactNode }) {
 export function DropdownMenuTrigger({ children, asChild }: { children: React.ReactElement; asChild?: boolean }) {
   const ctx = React.useContext(MenuCtx)!;
   const props = {
-    ref: ctx.triggerRef as any,
+    ref: ctx.triggerRef as unknown as React.Ref<unknown>,
     onClick: (e: React.MouseEvent) => {
       e.preventDefault();
       ctx.setOpen(!ctx.open);
     },
   };
   return asChild ? React.cloneElement(children, props) : (
-    <button {...props as any}>{children}</button>
+    <button {...(props as unknown as React.ButtonHTMLAttributes<HTMLButtonElement>)}>{children}</button>
   );
 }
 
@@ -48,7 +48,7 @@ export function DropdownMenuContent({
       const r = ctx.triggerRef.current.getBoundingClientRect();
       setPos({ top: r.bottom + sideOffset + window.scrollY, left: r.right + window.scrollX });
     }
-  }, [ctx.open, sideOffset]);
+  }, [ctx.open, sideOffset, ctx.triggerRef]);
 
   React.useEffect(() => {
     function handle(e: MouseEvent) {
@@ -102,4 +102,3 @@ export function DropdownMenuItem({ className, children, onSelect }: { className?
     </button>
   );
 }
-

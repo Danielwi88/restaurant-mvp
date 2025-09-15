@@ -1,6 +1,7 @@
 // src/services/queries/auth.ts
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiPost } from "../api/axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiGet, apiPost, apiPut } from "../api/axios";
+import { showToast } from "@/lib/toast";
 
 type Creds = { email: string; password: string; name?: string; phone?: string };
 
@@ -48,8 +49,9 @@ export const useLogin = () =>
         // Notify app that auth state changed so views can react
         try {
           window.dispatchEvent(new Event("auth:changed"));
-        } catch (_) {
+        } catch {
           // no-op in non-DOM environments
+          void 0;
         }
         qc.invalidateQueries();
       },
@@ -58,3 +60,26 @@ export const useLogin = () =>
 
 export const useRegister = () =>
   useMutation({ mutationFn: (body: Creds) => apiPost<{ success:boolean; data?: unknown; message?: string }>("auth/register", body) });
+
+type ProfileResponse = {
+  success?: boolean; message?: string; data?: { id?: number|string; name?: string; email?: string; phone?: string };
+};
+
+export const useProfile = () =>
+  useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      const res = await apiGet<ProfileResponse>("auth/profile");
+      const d = res?.data ?? {};
+      return { id: d.id, name: d.name ?? "", email: d.email ?? "", phone: d.phone ?? "" } as { id?: number|string; name: string; email: string; phone: string };
+    }
+  });
+
+export const useUpdateProfile = () =>
+  useMutation({
+    mutationFn: async (body: { name?: string; phone?: string; currentPassword?: string; newPassword?: string }) =>
+      apiPut<ProfileResponse>("auth/profile", body),
+    onSuccess: (res) => {
+      showToast(res?.message || "Profile updated", 'success');
+    }
+  });

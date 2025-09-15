@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
     <footer className="mt-16 bg-[#0E1116] text-white/90">
-      <div className="max-w-6xl mx-auto px-4 py-12 grid gap-8 md:grid-cols-4">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-0 py-12 grid gap-8 md:grid-cols-4">
         <div>
           <div className="flex items-center gap-2 font-semibold text-lg">
             <span className="inline-block size-6 rounded-full bg-[var(--brand)]"/> Foody

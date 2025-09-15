@@ -8,6 +8,7 @@ import Checkout from "@/pages/Checkout";
 import Success from "@/pages/Success";
 import Orders from "@/pages/Orders";
 import Categories from "@/pages/Categories";
+import Profile from "@/pages/Profile";
 
 const router = createBrowserRouter([
   { path: "/", element: <Home/> },
@@ -18,6 +19,7 @@ const router = createBrowserRouter([
   { path: "/checkout", element: <Checkout/> },
   { path: "/success", element: <Success/> },
   { path: "/orders", element: <Orders/> },
+  { path: "/profile", element: <Profile/> },
 ]);
 
 export default function AppRoutes(){ return <RouterProvider router={router}/>; }

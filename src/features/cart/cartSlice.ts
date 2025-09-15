@@ -20,6 +20,25 @@ const slice = createSlice({
       } else s.items.push(a.payload);
       save("cart", s);
     },
+    incrementQty: (s, a:PayloadAction<{id:string}>) => {
+      const it = s.items.find(i=>i.id===a.payload.id);
+      if (it) {
+        it.qty += 1;
+        save("cart", s);
+      }
+    },
+    decrementQty: (s, a:PayloadAction<{id:string}>) => {
+      const it = s.items.find(i=>i.id===a.payload.id);
+      if (it) {
+        if (it.qty > 1) {
+          it.qty -= 1;
+          save("cart", s);
+        } else {
+          s.items = s.items.filter(i => i.id !== a.payload.id);
+          save("cart", s);
+        }
+      }
+    },
     updateQty: (s, a:PayloadAction<{id:string;qty:number}>) => {
       const it = s.items.find(i=>i.id===a.payload.id);
       if (it) it.qty = Math.max(1, a.payload.qty);
@@ -36,5 +55,5 @@ const slice = createSlice({
     clearCart: (s) => { s.items = []; save("cart", s); }
   }
 });
-export const { addToCart, updateQty, removeFromCart, clearCart, setServerCartItemId } = slice.actions;
+export const { addToCart, incrementQty, decrementQty, updateQty, removeFromCart, clearCart, setServerCartItemId } = slice.actions;
 export default slice.reducer;

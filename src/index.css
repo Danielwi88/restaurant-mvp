@@ -1,13 +1,17 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Tailwind v4 custom breakpoints (use as `xs:`, `xm:`) */
+  --breakpoint-xs: 360px;
+  --breakpoint-xm: 480px;
   /* Brand tokens */
-  --color-brand: #C12116;
-  --font-sans: "Nunito", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  --color-brand: #c12116;
+  --font-sans: 'Nunito', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji',
+    'Segoe UI Emoji';
 
   /* Radius scale from the design system */
   --radius-none: 0px;
@@ -45,41 +49,41 @@
 
 :root {
   /* Base neutrals from the design */
-  --gray-25: #FDFDFD;
-  --gray-50: #FAFAFA;
-  --gray-100: #F5F5F5;
-  --gray-200: #E9EAEB;
-  --gray-300: #D5D7DA;
-  --gray-400: #A4A7AE;
+  --gray-25: #fdfdfd;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e9eaeb;
+  --gray-300: #d5d7da;
+  --gray-400: #a4a7ae;
   --gray-500: #717680;
   --gray-600: #535862;
   --gray-700: #414651;
-  --gray-800: #252B37;
-  --gray-900: #181D27;
-  --gray-950: #0A0D12;
+  --gray-800: #252b37;
+  --gray-900: #181d27;
+  --gray-950: #0a0d12;
 
   /* Primary and accents */
-  --brand: #C12116;
-  --accent-red: #D9206E;
+  --brand: #c12116;
+  --accent-red: #d9206e;
   --accent-green: #079455;
-  --accent-yellow: #FDB022;
+  --accent-yellow: #fdb022;
 
   /* Semantic surfaces */
   --background: var(--gray-25);
   --foreground: var(--gray-900);
-  --card: #FFFFFF;
+  --card: #ffffff;
   --card-foreground: var(--gray-900);
-  --popover: #FFFFFF;
+  --popover: #ffffff;
   --popover-foreground: var(--gray-900);
   --primary: var(--brand);
-  --primary-foreground: #FFFFFF;
+  --primary-foreground: #ffffff;
   --secondary: var(--gray-100);
   --secondary-foreground: var(--gray-900);
   --muted: var(--gray-100);
   --muted-foreground: var(--gray-600);
   --accent: var(--gray-100);
   --accent-foreground: var(--gray-900);
-  --destructive: #DC2626;
+  --destructive: #dc2626;
   --border: var(--gray-200);
   --input: var(--gray-200);
   --ring: var(--gray-400);
@@ -93,16 +97,16 @@
   --popover: #111418;
   --popover-foreground: var(--gray-25);
   --primary: var(--brand);
-  --primary-foreground: #FFFFFF;
-  --secondary: #1A1F2A;
+  --primary-foreground: #ffffff;
+  --secondary: #1a1f2a;
   --secondary-foreground: var(--gray-25);
-  --muted: #1A1F2A;
+  --muted: #1a1f2a;
   --muted-foreground: var(--gray-400);
-  --accent: #1A1F2A;
+  --accent: #1a1f2a;
   --accent-foreground: var(--gray-25);
-  --destructive: #EF4444;
-  --border: #2A2F3A;
-  --input: #2A2F3A;
+  --destructive: #ef4444;
+  --border: #2a2f3a;
+  --input: #2a2f3a;
   --ring: var(--gray-600);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
@@ -120,7 +124,9 @@
 }
 
 @layer base {
-  * { @apply border-border outline-ring/50; }
+  * {
+    @apply border-border outline-ring/50;
+  }
   body {
     @apply bg-background text-foreground font-sans;
   }

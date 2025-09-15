@@ -1,9 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "@/features/store";
 import type { RootState } from "@/features/store";
-import { updateQty, removeFromCart, setServerCartItemId } from "@/features/cart/cartSlice";
-import { useAddCartItem, useRemoveCartItem, type AddCartResponse } from "@/services/queries/orders";
+import { removeFromCart, setServerCartItemId, incrementQty, decrementQty } from "@/features/cart/cartSlice";
 import { showToast } from "@/lib/toast";
 import { formatCurrency } from "@/lib/format";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,14 +14,14 @@ import type { CartItem } from "@/types";
 import Navbar from "@/components/Navbar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
+import { apiPost, apiPut } from "@/services/api/axios";
 
 export default function CartPage() {
   const d = useAppDispatch();
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  const removeServer = useRemoveCartItem();
-  const addServer = useAddCartItem();
   const items = useAppSelector((s: RootState) => s.cart.items);
-  const [pendingRemove, setPendingRemove] = useState<Record<string, boolean>>({});
+  const [pendingRemove] = useState<Record<string, boolean>>({});
+  const [syncing, setSyncing] = useState(false);
+  const nav = useNavigate();
 
   // Group items by restaurant
   const groups = useMemo(() => {
@@ -38,66 +37,13 @@ export default function CartPage() {
 
   const grandTotal = items.reduce((a, b) => a + b.price * b.qty, 0);
 
-  const QtyControl = ({ id, qty, serverCartItemId, restaurantId, pending }: { id: string; qty: number; serverCartItemId?: string; restaurantId?: string; pending?: boolean }) => (
+  const QtyControl = ({ id, qty, pending }: { id: string; qty: number; pending?: boolean }) => (
     <div className="flex items-center gap-2">
       <button
         className="size-8 rounded-full border border-neutral-300 grid place-items-center text-zinc-700 disabled:opacity-60"
         aria-label="Decrease quantity"
         disabled={pending}
-        onClick={() => {
-          const nextQty = qty - 1;
-          if (token && serverCartItemId) {
-            if (nextQty > 0) {
-              // Optimistically decrement, then delete 1 unit on server
-              d(updateQty({ id, qty: nextQty }));
-              removeServer.mutate(serverCartItemId, {
-                onSuccess: () => {
-                  // Recreate remaining quantity on server to keep it in sync
-                  if (restaurantId) {
-                    const rnum = Number(restaurantId); const mnum = Number(id);
-                    addServer.mutate({
-                      restaurantId: Number.isFinite(rnum) ? rnum : restaurantId,
-                      menuId: Number.isFinite(mnum) ? mnum : id,
-                      quantity: nextQty,
-                    }, {
-                      onSuccess: (res: AddCartResponse) => {
-                        const newId = res?.data?.cartItem?.id;
-                        if (newId) d(setServerCartItemId({ id, serverCartItemId: String(newId) }));
-                      },
-                      onError: () => {
-                        // Rollback local qty if server couldn't be recreated
-                        d(updateQty({ id, qty }));
-                        showToast('Failed to update cart', 'error');
-                      }
-                    });
-                  }
-                },
-                onError: () => {
-                  // Rollback on failure
-                  d(updateQty({ id, qty }));
-                  showToast('Failed to update cart', 'error');
-                }
-              });
-            } else {
-              // Quantity would hit 0: show pending skeleton and delete on server
-              setPendingRemove(prev => ({ ...prev, [id]: true }));
-              removeServer.mutate(serverCartItemId, {
-                onSuccess: () => {
-                  d(removeFromCart(id));
-                  setPendingRemove(prev => { const nx = { ...prev }; delete nx[id]; return nx; });
-                },
-                onError: () => {
-                  setPendingRemove(prev => { const nx = { ...prev }; delete nx[id]; return nx; });
-                  showToast('Failed to remove item', 'error');
-                }
-              });
-            }
-          } else {
-            // Not linked to server: local fallback
-            if (nextQty > 0) d(updateQty({ id, qty: nextQty }));
-            else d(removeFromCart(id));
-          }
-        }}
+        onClick={() => { d(decrementQty({ id })); }}
       >
         <MinusIcon className="size-4" />
       </button>
@@ -105,28 +51,42 @@ export default function CartPage() {
       <button
         className="size-8 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center disabled:opacity-60"
         aria-label="Increase quantity"
-        disabled={pending || addServer.isPending}
-        onClick={() => {
-          if (token && restaurantId) {
-            const rnum = Number(restaurantId); const mnum = Number(id);
-            addServer.mutate({
-              restaurantId: Number.isFinite(rnum) ? rnum : restaurantId,
-              menuId: Number.isFinite(mnum) ? mnum : id,
-              quantity: 1,
-            }, {
-              onSuccess: () => { d(updateQty({ id, qty: qty + 1 })); showToast('Item added to cart successfully', 'success'); },
-              onError: () => { d(updateQty({ id, qty: qty + 1 })); showToast('Added to cart', 'success'); }
-            });
-          } else {
-            d(updateQty({ id, qty: qty + 1 }));
-            showToast('Added to cart', 'success');
-          }
-        }}
+        disabled={pending}
+        onClick={() => { d(incrementQty({ id })); }}
       >
         <PlusIcon className="size-4" />
       </button>
     </div>
   );
+
+  const syncAndGoCheckout = async (groupItems: CartItem[]) => {
+    const tokenNow = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!tokenNow) { nav('/checkout'); return; }
+    setSyncing(true);
+    try {
+      const ops = groupItems.map(async (it) => {
+        if (it.serverCartItemId) {
+          await apiPut(`cart/${it.serverCartItemId}`, { quantity: it.qty });
+        } else if (it.restaurantId) {
+          const rnum = Number(it.restaurantId); const mnum = Number(it.id);
+          const res = await apiPost<{ data?: { cartItem?: { id?: number | string } } }>('cart', {
+            restaurantId: Number.isFinite(rnum) ? rnum : it.restaurantId,
+            menuId: Number.isFinite(mnum) ? mnum : it.id,
+            quantity: it.qty,
+          });
+          const sid = res?.data?.cartItem?.id;
+          if (sid) d(setServerCartItemId({ id: it.id, serverCartItemId: String(sid) }));
+        }
+      });
+      await Promise.allSettled(ops);
+      nav('/checkout');
+    } catch (e) {
+      if (import.meta.env.DEV) console.error('[cart] sync before checkout failed', e);
+      showToast('Failed to sync cart. Please retry.', 'error');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const GroupHeader = ({ restaurantId }: { restaurantId: string }) => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -180,7 +140,7 @@ export default function CartPage() {
                           <div className="text-sm text-zinc-700">{it.name}</div>
                           <div className="text-[var(--color-brand,#D22B21)] font-semibold">{formatCurrency(it.price)}</div>
                         </div>
-                        <QtyControl id={it.id} qty={it.qty} serverCartItemId={it.serverCartItemId} restaurantId={it.restaurantId} pending={pendingRemove[it.id]} />
+                        <QtyControl id={it.id} qty={it.qty} pending={pendingRemove[it.id]} />
                         <button
                           className="ml-2 size-8 rounded-full border border-neutral-300 grid place-items-center text-zinc-600"
                           aria-label="Remove item"
@@ -202,8 +162,8 @@ export default function CartPage() {
                     <div className="text-zinc-600">Total</div>
                     <div className="font-bold">{formatCurrency(groupTotal)}</div>
                   </div>
-                  <Button asChild className="rounded-full px-6">
-                    <Link to="/checkout">Checkout</Link>
+                  <Button className="rounded-full px-6" onClick={() => syncAndGoCheckout(g.items)} disabled={syncing}>
+                    {syncing ? 'Updating…' : 'Checkout'}
                   </Button>
                 </div>
               </CardContent>

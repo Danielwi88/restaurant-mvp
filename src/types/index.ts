@@ -18,4 +18,7 @@ export type Order = {
   id: string; items: CartItem[]; total: number;
   customerName: string; phone: string; address: string;
   createdAt: string; status?: "PREPARING"|"ON_THE_WAY"|"DELIVERED"|"DONE"|"CANCELED";
+  transactionId?: string;
+  restaurantId?: string;
+  restaurantName?: string;
 };

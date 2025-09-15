@@ -17,28 +17,62 @@ export function useGeolocation(): GeoState {
           return { position: { lat: p.lat, long: p.long }, loading: false };
         }
       }
-    } catch {}
+    } catch { void 0; }
     return { position: null, loading: true };
   });
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setState((s) => ({ ...s, loading: false, error: 'Geolocation not supported' }));
-      return;
+    let aborted = false;
+    const finish = (next: Partial<GeoState>) => {
+      if (!aborted) setState((s) => ({ ...s, ...next }));
+    };
+
+    // Only attempt in secure contexts (https or localhost)
+    const isSecure = typeof window !== 'undefined' && (window.isSecureContext || window.location.hostname === 'localhost');
+    if (!isSecure) {
+      finish({ loading: false, error: 'Location requires HTTPS (or localhost)' });
+      return () => { aborted = true; };
     }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const position = { lat: pos.coords.latitude, long: pos.coords.longitude } as LatLong;
-        setState({ position, loading: false });
-        try { localStorage.setItem('user_geo', JSON.stringify(position)); } catch {}
-      },
-      (err) => {
-        setState((s) => ({ ...s, loading: false, error: err.message || 'Failed to get location' }));
-      },
-      { enableHighAccuracy: false, maximumAge: 60_000, timeout: 10_000 },
-    );
+
+    if (!navigator.geolocation) {
+      finish({ loading: false, error: 'Geolocation not supported' });
+      return () => { aborted = true; };
+    }
+
+    const getOnce = (retry = false) => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const position = { lat: pos.coords.latitude, long: pos.coords.longitude } as LatLong;
+          finish({ position, loading: false, error: undefined });
+          try { localStorage.setItem('user_geo', JSON.stringify(position)); } catch { void 0; }
+        },
+        (err) => {
+          // Retry once for transient errors like kCLErrorDomain/kCLErrorLocationUnknown
+          const transient = (err.code === err.POSITION_UNAVAILABLE || err.code === err.TIMEOUT);
+          if (!retry && transient) {
+            setTimeout(() => { if (!aborted) getOnce(true); }, 1000);
+          } else {
+            finish({ loading: false, error: err.message || 'Failed to get location' });
+          }
+        },
+        { enableHighAccuracy: false, maximumAge: 60_000, timeout: 10_000 },
+      );
+    };
+
+    // Ask permission status when available to avoid noisy OS errors
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const navPerms = (navigator as any).permissions as { query?: (x:{name:string})=>Promise<{state:'granted'|'denied'|'prompt'}> } | undefined;
+      if (navPerms?.query) {
+        navPerms.query({ name: 'geolocation' }).then((p) => {
+          if (p.state === 'denied') finish({ loading: false, error: 'Location permission denied' });
+          else getOnce();
+        }).catch(() => getOnce());
+      } else getOnce();
+    } catch { getOnce(); }
+
+    return () => { aborted = true; };
   }, []);
 
   return state;
 }
-

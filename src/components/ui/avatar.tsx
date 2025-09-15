@@ -19,13 +19,21 @@ export function AvatarImage({
   alt,
   className,
 }: { src?: string | null; alt?: string; className?: string }) {
-  if (!src) return null;
+  const fallback = "/avatar1.svg";
+  const finalSrc = src && String(src).trim().length > 0 ? src : fallback;
   return (
     <img
-      src={src}
+      src={finalSrc}
       alt={alt}
       className={cn("h-full w-full object-cover", className)}
       referrerPolicy="no-referrer"
+      onError={(e) => {
+        const img = e.currentTarget as HTMLImageElement;
+        if (!img.src.endsWith(fallback)) {
+          img.onerror = null;
+          img.src = fallback;
+        }
+      }}
     />
   );
 }
@@ -36,4 +44,3 @@ export function AvatarFallback({
 }: React.ComponentProps<"div">) {
   return <div className={cn("text-sm font-medium", className)}>{children}</div>;
 }
-

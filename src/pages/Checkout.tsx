@@ -9,12 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { RootState } from "@/features/store";
-import { removeFromCart, updateQty, setServerCartItemId } from "@/features/cart/cartSlice";
+import { updateQty, clearCart } from "@/features/cart/cartSlice";
 import { MapPinIcon, MinusIcon, PlusIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useAddCartItem, useRemoveCartItem, type AddCartResponse } from "@/services/queries/orders";
+import { apiPost, apiPut, apiDelete } from "@/services/api/axios";
 import { showToast } from "@/lib/toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import Navbar from "@/components/Navbar";
 
 export default function Checkout() {
   const d = useAppDispatch();
@@ -26,13 +27,11 @@ export default function Checkout() {
   const createOrder = useCreateOrder();
   const nav = useNavigate();
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  const removeServer = useRemoveCartItem();
-  const addServer = useAddCartItem();
-  const [pendingRemove, setPendingRemove] = useState<Record<string, boolean>>({});
+  
+  const [pendingRemove] = useState<Record<string, boolean>>({});
 
   
-  const [addr, setAddr] = useState({ name: "", phone: "", address: "" });
+  const [addr, setAddr] = useState({ name: "", phone: "", address: "", notes: "" });
   const [editing, setEditing] = useState(false);
 
   // Payment method selection (visual only for now)
@@ -43,6 +42,7 @@ export default function Checkout() {
     { id: "mandiri", label: "Mandiri", logo: "/mandiri.png" },
   ] as const;
   const [method, setMethod] = useState<(typeof methods)[number]["id"]>("bni");
+  const [isPlacing, setIsPlacing] = useState(false);
 
   useEffect(() => {
     if (items.length === 0) {
@@ -50,23 +50,104 @@ export default function Checkout() {
     }
   }, [items.length, nav]);
 
+  type CheckoutApiBody = { paymentMethod: string; deliveryAddress: string; notes?: string };
+  type CheckoutApiResponse = {
+    success?: boolean;
+    message?: string;
+    data?: {
+      transaction?: {
+        id?: number;
+        transactionId?: string;
+        paymentMethod?: string;
+        status?: string;
+        pricing?: { subtotal?: number; serviceFee?: number; deliveryFee?: number; totalPrice?: number };
+        restaurants?: Array<{
+          restaurant?: { id?: number; name?: string; logo?: string };
+          items?: Array<{ menuId?: number; menuName?: string; price?: number; quantity?: number; itemTotal?: number }>;
+          subtotal?: number;
+        }>;
+        createdAt?: string;
+      };
+    };
+  };
+
   const buy = async () => {
-    const payload = {
-      items: items.map(i => ({ id: i.id, qty: i.qty })),
-      customerName: addr.name.trim(),
-      phone: addr.phone.trim(),
-      address: addr.address.trim(),
-      method,
-    } as unknown as Parameters<typeof createOrder.mutateAsync>[0];
+    setIsPlacing(true);
+    showToast('Your transaction is being processed');
     try {
-      await createOrder.mutateAsync(payload);
-      nav("/success", { replace: true });
+      // Sync local cart to server before placing order
+      const tokenNow = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      if (tokenNow) {
+        const ops = items.map(async (it) => {
+          if (it.serverCartItemId) {
+            await apiPut(`cart/${it.serverCartItemId}`, { quantity: it.qty });
+          } else if (it.restaurantId) {
+            const rnum = Number(it.restaurantId); const mnum = Number(it.id);
+            await apiPost('cart', {
+              restaurantId: Number.isFinite(rnum) ? rnum : it.restaurantId,
+              menuId: Number.isFinite(mnum) ? mnum : it.id,
+              quantity: it.qty,
+            });
+          }
+        });
+        await Promise.allSettled(ops);
+      }
+      // Post finalized checkout payload as requested
+      const methodLabel = (() => {
+        const m = [
+          { id: "bni", label: "Bank Negara Indonesia" },
+          { id: "bri", label: "Bank Rakyat Indonesia" },
+          { id: "bca", label: "Bank Central Asia" },
+          { id: "mandiri", label: "Mandiri" },
+        ].find(x => x.id === method);
+        return m?.label ?? method;
+      })();
+
+      const checkoutRes = await apiPost<CheckoutApiResponse>('order/checkout', {
+        paymentMethod: methodLabel,
+        deliveryAddress: addr.address.trim(),
+        notes: addr.notes?.trim() || ''
+      } as CheckoutApiBody);
+
+      // Navigate to success first
+      nav("/success", {
+        replace: true,
+        state: {
+          summary: {
+            date: new Date().toISOString(),
+            paymentMethod: methodLabel,
+            subtotal: total,
+            deliveryFee,
+            serviceFee,
+            total: total + deliveryFee + serviceFee,
+            itemsCount: items.length,
+            api: checkoutRes,
+          }
+        }
+      });
+
+      // Then clear the cart in background (server + local)
+      void (async () => {
+        try { await apiDelete('cart'); } catch { /* best-effort */ }
+        d(clearCart());
+      })();
     } catch (err) {
       if (import.meta.env.DEV) console.error("[checkout] create order failed", err);
+    } finally {
+      setIsPlacing(false);
     }
   };
 
+  
+  const addItemHref = (() => {
+    const ids = Array.from(new Set(items.map(i => i.restaurantId).filter(Boolean))) as string[];
+    if (ids.length === 1) return `/restaurant/${ids[0]}`;
+    return "/categories";
+  })();
+
   return (
+    <>
+    <Navbar/>
     <div className="max-w-6xl mx-auto px-4 py-10 grid lg:grid-cols-3 gap-6">
       {/* Left: Address + Items */}
       <div className="lg:col-span-2 space-y-6">
@@ -98,6 +179,11 @@ export default function Checkout() {
                       <textarea id="address" value={addr.address} onChange={(e)=>setAddr(a=>({...a, address:e.target.value}))}
                         className="w-full border rounded-md p-3 min-h-28 outline-none focus:ring-2 focus:ring-[var(--color-brand,#D22B21)]/30" />
                     </div>
+                    <div className="sm:col-span-2">
+                      <Label htmlFor="notes">Notes (optional)</Label>
+                      <textarea id="notes" value={addr.notes} onChange={(e)=>setAddr(a=>({...a, notes:e.target.value}))}
+                        className="w-full border rounded-md p-3 min-h-20 outline-none focus:ring-2 focus:ring-[var(--color-brand,#D22B21)]/30" placeholder="Please ring the doorbell" />
+                    </div>
                   </div>
                 )}
               </div>
@@ -116,7 +202,7 @@ export default function Checkout() {
             <div className="flex items-center justify-between">
               <div className="font-semibold">Items</div>
               <Button asChild variant="outline" className="rounded-full h-8 px-3 text-sm">
-                <Link to="/categories">Add item</Link>
+                <Link to={addItemHref}>Add item</Link>
               </Button>
             </div>
             <div className="mt-3 space-y-3">
@@ -141,56 +227,9 @@ export default function Checkout() {
                       <button
                         className="size-8 rounded-full border border-neutral-300 grid place-items-center text-zinc-700 disabled:opacity-60"
                         aria-label="Decrease"
-                      onClick={() => {
-                        const nextQty = i.qty - 1;
-                        if (token && i.serverCartItemId) {
-                          if (nextQty > 0) {
-                            // Optimistically decrement then delete 1 unit on server
-                            d(updateQty({ id: i.id, qty: nextQty }));
-                            removeServer.mutate(i.serverCartItemId, {
-                              onSuccess: () => {
-                                if (i.restaurantId) {
-                                  const rnum = Number(i.restaurantId); const mnum = Number(i.id);
-                                  addServer.mutate({
-                                    restaurantId: Number.isFinite(rnum) ? rnum : i.restaurantId,
-                                    menuId: Number.isFinite(mnum) ? mnum : i.id,
-                                    quantity: nextQty,
-                                  }, {
-                                    onSuccess: (res: AddCartResponse) => {
-                                      const newId = res?.data?.cartItem?.id;
-                                      if (newId) d(setServerCartItemId({ id: i.id, serverCartItemId: String(newId) }));
-                                    },
-                                    onError: () => {
-                                      d(updateQty({ id: i.id, qty: i.qty }));
-                                      showToast('Failed to update cart', 'error');
-                                    }
-                                  });
-                                }
-                              },
-                              onError: () => {
-                                // Rollback
-                                d(updateQty({ id: i.id, qty: i.qty }));
-                                showToast('Failed to update cart', 'error');
-                              }
-                            });
-                          } else {
-                            // Hit zero: show skeleton and delete
-                            setPendingRemove(prev => ({ ...prev, [i.id]: true }));
-                            removeServer.mutate(i.serverCartItemId, {
-                              onSuccess: () => {
-                                  d(removeFromCart(i.id));
-                                  setPendingRemove(prev => { const nx = { ...prev }; delete nx[i.id]; return nx; });
-                                },
-                                onError: () => {
-                                  setPendingRemove(prev => { const nx = { ...prev }; delete nx[i.id]; return nx; });
-                                  showToast('Failed to remove item', 'error');
-                                }
-                              });
-                            }
-                          } else {
-                            if (nextQty > 0) d(updateQty({ id: i.id, qty: nextQty }));
-                            else d(removeFromCart(i.id));
-                          }
+                        onClick={() => {
+                          const next = Math.max(1, i.qty - 1);
+                          d(updateQty({ id: i.id, qty: next }));
                         }}
                         disabled={pendingRemove[i.id]}
                       >
@@ -201,22 +240,10 @@ export default function Checkout() {
                         className="size-8 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center disabled:opacity-60"
                         aria-label="Increase"
                         onClick={() => {
-                          if (token && i.restaurantId) {
-                            const rnum = Number(i.restaurantId); const mnum = Number(i.id);
-                            addServer.mutate({
-                              restaurantId: Number.isFinite(rnum) ? rnum : i.restaurantId,
-                              menuId: Number.isFinite(mnum) ? mnum : i.id,
-                              quantity: 1,
-                            }, {
-                              onSuccess: () => { d(updateQty({ id: i.id, qty: i.qty + 1 })); showToast('Item added to cart successfully', 'success'); },
-                              onError: () => { d(updateQty({ id: i.id, qty: i.qty + 1 })); showToast('Added to cart', 'success'); }
-                            });
-                          } else {
-                            d(updateQty({ id: i.id, qty: i.qty + 1 }));
-                            showToast('Added to cart', 'success');
-                          }
+                          const next = i.qty + 1;
+                          d(updateQty({ id: i.id, qty: next }));
                         }}
-                        disabled={pendingRemove[i.id] || addServer.isPending}
+                        disabled={pendingRemove[i.id]}
                       >
                         <PlusIcon className="size-4" />
                       </button>
@@ -263,12 +290,11 @@ export default function Checkout() {
             <div className="flex justify-between font-bold mb-3">
               <span>Total</span><span>{formatCurrency(grandTotal)}</span>
             </div>
-            <Button className="w-full rounded-full" onClick={() => setConfirmOpen(true)} disabled={!items.length || createOrder.isPending}>
-              {createOrder.isPending ? 'Processing…' : 'Buy'}
+            <Button className="w-full rounded-full" onClick={() => setConfirmOpen(true)} disabled={!items.length || isPlacing}>
+              {isPlacing ? 'Processing…' : 'Buy'}
             </Button>
           </CardContent>
         </Card>
-
         {/* Confirm Payment Dialog */}
         <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
           <DialogContent className="sm:max-w-md">
@@ -280,11 +306,40 @@ export default function Checkout() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setConfirmOpen(false)}>Cancel</Button>
-              <Button onClick={() => { setConfirmOpen(false); buy(); }} disabled={createOrder.isPending}>Yes, Pay</Button>
+              <Button onClick={() => { setConfirmOpen(false); buy(); }} disabled={isPlacing}>Yes, Pay</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </aside>
     </div>
+    {isPlacing && (
+      <div className="fixed inset-0 z-[60] bg-white/70 backdrop-blur-[2px] grid place-items-center">
+        <Card className="w-full max-w-sm shadow-sm">
+          <CardContent className="p-5">
+            <div className="text-sm font-medium mb-3">Processing payment…</div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-28" />
+              </div>
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-4 w-36" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+              <Separator />
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-5 w-16" />
+                <Skeleton className="h-5 w-24" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )}
+    </>
   );
 }

@@ -3,16 +3,23 @@ import { Button } from "@/components/ui/button";
 import type { MenuItem } from "@/types";
 import { formatKm } from "@/lib/geo";
 import { formatCurrency } from "@/lib/format";
-import { useAppDispatch } from "@/features/store";
-import { addToCart } from "@/features/cart/cartSlice";
+import { useAppDispatch, useAppSelector } from "@/features/store";
+import { addToCart, incrementQty, decrementQty } from "@/features/cart/cartSlice";
 import { useAddCartItem, type AddCartResponse } from "@/services/queries/orders";
 import { showToast } from "@/lib/toast";
 
-export default function ProductCard({ item, distanceKm }: { item: MenuItem; distanceKm?: number }) {
+export default function ProductCard({ item, distanceKm, localOnly }: { item: MenuItem; distanceKm?: number; localOnly?: boolean }) {
   const d = useAppDispatch();
   const addServer = useAddCartItem();
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const qty = useAppSelector((s) => s.cart.items.find((i) => i.id === item.id)?.qty ?? 0);
+
   const onAdd = () => {
+    if (localOnly) {
+      d(addToCart({ id:item.id, name:item.name, price:item.price, qty:1, imageUrl:item.imageUrl, restaurantId:item.restaurantId }));
+      showToast('Added to cart', 'success');
+      return;
+    }
     if (token && item.restaurantId) {
       const restaurantIdNum = Number(item.restaurantId);
       const menuIdNum = Number(item.id);
@@ -58,9 +65,29 @@ export default function ProductCard({ item, distanceKm }: { item: MenuItem; dist
         {typeof distanceKm === 'number' && (
           <div className="mt-1 text-xs text-zinc-600">{formatKm(distanceKm)}</div>
         )}
-        <Button className="w-full mt-3" onClick={onAdd} disabled={addServer.isPending}>
-          {addServer.isPending ? 'Adding…' : 'Add'}
-        </Button>
+        {qty > 0 ? (
+          <div className="w-full mt-3 flex items-center justify-center gap-3">
+            <button
+              className="size-8 rounded-full border border-neutral-300 grid place-items-center text-zinc-700"
+              aria-label="Decrease quantity"
+              onClick={() => d(decrementQty({ id: item.id }))}
+            >
+              -
+            </button>
+            <div className="w-5 text-center text-sm font-medium" aria-live="polite">{qty}</div>
+            <button
+              className="size-8 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center"
+              aria-label="Increase quantity"
+              onClick={() => d(incrementQty({ id: item.id }))}
+            >
+              +
+            </button>
+          </div>
+        ) : (
+          <Button className="w-full mt-3" onClick={onAdd} disabled={!localOnly && addServer.isPending}>
+            {!localOnly && addServer.isPending ? 'Adding…' : 'Add'}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
