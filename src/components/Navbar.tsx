@@ -221,7 +221,7 @@ export default function Navbar() {
             </svg>
 
             {count > 0 && (
-              <span className='absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-[var(--color-brand,#D22B21)] text-white text-[10px] leading-4 text-center'>
+              <span className='absolute -top-1 -right-1.5 min-w-5 h-5 px-0 rounded-full bg-[var(--color-brand,#D22B21)] text-white font-bold text-[12px] leading-5 text-center'>
                 {count}
               </span>
             )}
@@ -229,10 +229,10 @@ export default function Navbar() {
 
           {!token ? (
             <div className='flex items-center gap-2'>
-              <Button variant='outline' asChild aria-label='Sign in'>
+              <Button className='bg-transparent h-12 w-[163px] text-gray-300 border-2 rounded-full text-[16px] font-bold' variant='outline' asChild aria-label='Sign in'>
                 <Link to='/auth?mode=in'>Sign In</Link>
               </Button>
-              <Button asChild aria-label='Sign up'>
+              <Button className='bg-gray-300 h-12 w-[163px] text-gray-950 border-2 rounded-full text-[16px] font-bold' variant='ghost' asChild aria-label='Sign up'>
                 <Link to='/auth?mode=up'>Sign Up</Link>
               </Button>
             </div>
