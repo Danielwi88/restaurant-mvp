@@ -36,10 +36,10 @@ export default function Checkout() {
 
   // Payment method selection (visual only for now)
   const methods = [
-    { id: "bni", label: "Bank Negara Indonesia", logo: "/bni.png" },
-    { id: "bri", label: "Bank Rakyat Indonesia", logo: "/bri.png" },
-    { id: "bca", label: "Bank Central Asia", logo: "/bca.png" },
-    { id: "mandiri", label: "Mandiri", logo: "/mandiri.png" },
+    { id: "bni", label: "Bank Negara Indonesia", logo: "/BNI.svg" },
+    { id: "bri", label: "Bank Rakyat Indonesia", logo: "/BRI.svg" },
+    { id: "bca", label: "Bank Central Asia", logo: "/BCA.svg" },
+    { id: "mandiri", label: "Mandiri", logo: "/Mandiri.svg" },
   ] as const;
   const [method, setMethod] = useState<(typeof methods)[number]["id"]>("bni");
   const [isPlacing, setIsPlacing] = useState(false);
@@ -126,7 +126,7 @@ export default function Checkout() {
         }
       });
 
-      // Then clear the cart in background (server + local)
+      // clear the cart in background (server + local)
       void (async () => {
         try { await apiDelete('cart'); } catch { /* best-effort */ }
         d(clearCart());
@@ -148,9 +148,9 @@ export default function Checkout() {
   return (
     <>
     <Navbar/>
-    <div className="max-w-6xl mx-auto px-4 py-10 grid lg:grid-cols-3 gap-6">
+    <div className="max-w-[1000px] mx-auto px-4 py-10 grid lg:grid-cols-3 gap-6 gap-x-0">
       {/* Left: Address + Items */}
-      <div className="lg:col-span-2 space-y-6">
+      <div className="max-w-[590px] lg:col-span-2 space-y-6">
         {/* Delivery Address card */}
         <Card className="rounded-2xl border border-neutral-200 shadow-sm">
           <CardContent className="p-5">
@@ -262,7 +262,7 @@ export default function Checkout() {
       </div>
 
       {/* Right: Payment + Summary */}
-      <aside className="lg:col-span-1 space-y-4">
+      <aside className="min-w-[390px] lg:col-span-1 space-y-4">
         <Card className="rounded-2xl border border-neutral-200 shadow-sm">
           <CardContent className="p-5">
             <div className="font-semibold mb-3">Payment Method</div>
@@ -270,7 +270,7 @@ export default function Checkout() {
               {methods.map(m => (
                 <label key={m.id} className="flex items-center justify-between py-2 px-3 rounded-md border border-transparent hover:border-neutral-200">
                   <div className="flex items-center gap-3">
-                    <img src={m.logo} alt={m.label} className="h-5" onError={(e)=>{const img=e.currentTarget as HTMLImageElement; img.style.visibility='hidden';}} />
+                    <img src={m.logo} alt={m.label} className="h-10 w-10 border rounded-lg" onError={(e)=>{const img=e.currentTarget as HTMLImageElement; img.style.visibility='hidden';}} />
                     <span className="text-sm">{m.label}</span>
                   </div>
                   <input type="radio" name="method" checked={method===m.id} onChange={()=>setMethod(m.id)} className="accent-[var(--color-brand,#D22B21)]" />

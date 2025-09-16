@@ -112,7 +112,7 @@ export default function CartPage() {
     <>
       
       <Navbar/>
-    <div className="max-w-6xl mx-auto px-4 py-10">
+    <div className="max-w-[800px] mx-auto px-4 py-10">
       <h2 className="text-2xl font-semibold mb-6">My Cart</h2>
 
       <div className="space-y-5">

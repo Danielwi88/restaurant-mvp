@@ -1,12 +1,9 @@
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { LogoutDialog } from '@/components/ui/dialog';
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { setServerCartItemId } from '@/features/cart/cartSlice';
 import type { RootState } from '@/features/store';
@@ -14,11 +11,14 @@ import { useAppDispatch, useAppSelector } from '@/features/store';
 import { showToast } from '@/lib/toast';
 import { apiPost, apiPut } from '@/services/api/axios';
 import { useQueryClient } from '@tanstack/react-query';
-import { LogOutIcon, MapPinIcon, ReceiptIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import UserMenuContent from './user-menu-content';
+
 
 type StoredUser = { name?: string; avatar?: string; avatarUrl?: string };
+
+
 
 export default function Navbar() {
   const count = useAppSelector((s: RootState) =>
@@ -30,7 +30,7 @@ export default function Navbar() {
   const [user, setUser] = useState<StoredUser | null>(null);
   const nav = useNavigate();
   const location = useLocation();
-
+  const [logoutOpen, setLogoutOpen] = useState(false);
   // Detect auth mode from query string ("in" or "up"); default is Sign Up
   const searchParams = new URLSearchParams(location.search);
   const mode = (searchParams.get('mode') as 'in' | 'up' | null) ?? null;
@@ -69,7 +69,6 @@ export default function Navbar() {
     }
   }, []);
 
- 
   useEffect(() => {
     const onScroll = () => {
       setScrolled(typeof window !== 'undefined' ? window.scrollY > 4 : false);
@@ -92,12 +91,11 @@ export default function Navbar() {
   const avatarUrl = user?.avatarUrl ?? user?.avatar ?? null;
 
   const openCart = async () => {
-    
     if (location.pathname.startsWith('/restaurant/')) {
       nav('/cart');
       return;
     }
-    
+
     const tokenNow =
       typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     if (!tokenNow) {
@@ -157,7 +155,7 @@ export default function Navbar() {
     <header
       className={`sticky top-0 z-50 transition-all duration-300 backdrop-blur-xs ${
         scrolled
-          ? 'bg-white/90 supports-[backdrop-filter]:bg-white/95 border-none border-neutral-200 shadow-sm'
+          ? 'bg-white/90 supports-[backdrop-filter]:bg-white/95 border-none border-neutral-200  shadow-[0_0_20px_0_rgba(203,202,202,0.25)]'
           : 'bg-transparent border-transparent '
       }`}
     >
@@ -170,7 +168,7 @@ export default function Navbar() {
         >
           <svg
             xmlns='http://www.w3.org/2000/svg'
-            className={`size-10 sm:size-12 font-semibold text-lg flex items-center gap-[15px] transition-colors ${
+            className={`size-10 sm:size-[42px] font-semibold text-lg flex items-center gap-[15px] transition-colors ${
               scrolled ? 'text-brand' : isHome ? 'text-white' : 'text-brand'
             }`}
             viewBox='0 0 42 42'
@@ -290,11 +288,11 @@ export default function Navbar() {
                   aria-label='Open user menu'
                   className='flex items-center gap-4 overflow-visible cursor-pointer'
                 >
-                  <Avatar className='size-10 sm:size-12 shrink-0 aspect-square bg-white border-none p-0'>
+                  <Avatar className='size-10 sm:size-12 shrink-0 aspect-square bg-transparent border-none p-0'>
                     <AvatarImage
                       src={avatarUrl}
                       alt={name}
-                      className='object-contain object-center'
+                      className='object-contain object-center cursor-pointer'
                     />
                   </Avatar>
                   <span
@@ -310,53 +308,23 @@ export default function Navbar() {
                   </span>
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className='rounded-2xl'>
-                <DropdownMenuLabel>
-                  <div
-                    className='flex items-center gap-2 cursor-pointer'
-                    role='button'
-                    aria-label='Go to profile'
-                    onClick={() => nav('/profile')}
-                  >
-                    <Avatar className='size-8 shrink-0 aspect-square bg-white p-0.5'>
-                      <AvatarImage
-                        src={avatarUrl}
-                        alt={name}
-                        className='object-contain object-center'
-                      />
-                    </Avatar>
-
-                    <div className='font-semibold'>{name}</div>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onSelect={() => {
-                    /* placeholder route */
-                  }}
-                >
-                  <div className='flex items-center gap-3'>
-                    <MapPinIcon className='size-4' />
-                    <span>Delivery Address</span>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => nav('/orders')}>
-                  <div className='flex items-center gap-3'>
-                    <ReceiptIcon className='size-4' />
-                    <span>My Orders</span>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={logout}>
-                  <div className='flex items-center gap-3 text-red-600'>
-                    <LogOutIcon className='size-4' />
-                    <span>Logout</span>
-                  </div>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
+              <UserMenuContent
+                name={name}
+                avatarUrl={avatarUrl}
+                onClickProfile={() => nav('/profile')}
+                onClickAddress={() => { /* placeholder route */ }}
+                onClickOrders={() => nav('/orders')}
+                onClickLogout={() => setLogoutOpen(true)}
+              />
             </DropdownMenu>
           )}
         </div>
       </div>
+      <LogoutDialog
+        open={logoutOpen}
+        onOpenChange={setLogoutOpen}
+        onConfirm={logout}
+      />
     </header>
   );
 }
