@@ -204,7 +204,7 @@ export default function Auth() {
                 onClick={() => setTab('in')}
                 className={`h-9 sm:h-10 rounded-md sm:rounded-xl border-none shadow-none cursor-pointer ${
                   tab === 'in'
-                    ? 'bg-white text-gray-950'
+                    ? 'bg-white text-gray-950 hover:bg-white hover:font-bold'
                     : 'bg-transparent text-gray-600 hover:bg-white hover:text-gray-950'
                 }`}
               >
@@ -215,7 +215,7 @@ export default function Auth() {
                 onClick={() => setTab('up')}
                 className={`h-9 sm:h-10 rounded-md sm:rounded-xl border-none shadow-none cursor-pointer ${
                   tab === 'up'
-                    ? 'bg-white text-gray-950'
+                    ? 'bg-white text-gray-950 hover:bg-white hover:font-bold'
                     : 'bg-transparent text-gray-600 hover:bg-white hover:text-gray-950'
                 }`}
               >
@@ -233,7 +233,7 @@ export default function Auth() {
                     <Input
                       id='name'
                       placeholder=' '
-                      className='peer h-12 sm:h-14'
+                      className='peer h-12 sm:h-14 pt-4 sm:pt-5'
                       {...rhfRegister('name', {
                         validate: (v) =>
                           tab === 'up' && !v ? 'Name is required' : true,
@@ -241,15 +241,7 @@ export default function Auth() {
                     />
                     <label
                       htmlFor='name'
-                      className='
-  absolute left-3
-  top-1/2 -translate-y-1/2
-  text-gray-400 text-sm
-  transition-all
-  peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm
-  peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-gray-600
-  bg-white px-1
-'
+                      className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-gray-600 peer-not-placeholder-shown:top-2 peer-not-placeholder-shown:translate-y-0 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-gray-600 bg-transparent px-1'
                     >
                       Name
                     </label>
@@ -264,7 +256,7 @@ export default function Auth() {
                     <Input
                       id='phone'
                       placeholder=' '
-                      className='peer h-12 sm:h-14'
+                      className='peer h-12 sm:h-14 pt-4 sm:pt-5'
                       {...rhfRegister('phone', {
                         validate: (v) => {
                           if (tab !== 'up') return true;
@@ -277,15 +269,7 @@ export default function Auth() {
                     />
                     <label
                       htmlFor='phone'
-                      className='
-  absolute left-3
-  top-1/2 -translate-y-1/2
-  text-gray-400 text-sm
-  transition-all
-  peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm
-  peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-gray-600
-  bg-white px-1
-'
+                      className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-gray-600 peer-not-placeholder-shown:top-2 peer-not-placeholder-shown:translate-y-0 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-gray-600 bg-transparent px-1'
                     >
                       Phone
                     </label>
@@ -304,7 +288,7 @@ export default function Auth() {
                   type='email'
                   autoComplete='email'
                   placeholder=' '
-                  className='peer mb-4 sm:mb-5 h-12 sm:h-14'
+                  className='peer mb-4 sm:mb-5 h-12 sm:h-14 pt-4 sm:pt-5'
                   {...rhfRegister('email', {
                     required: 'Email is required',
                     pattern: {
@@ -316,15 +300,7 @@ export default function Auth() {
                 />
                 <label
                   htmlFor='email'
-                  className='
-    absolute left-3
-    top-1/2 -translate-y-1/2
-    text-gray-400 text-sm
-    transition-all
-    peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm
-    peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-gray-600
-    bg-white px-1
-  '
+                  className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-gray-600 peer-not-placeholder-shown:top-2 peer-not-placeholder-shown:translate-y-0 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-gray-600 bg-transparent px-1'
                 >
                   Email
                 </label>
@@ -341,7 +317,7 @@ export default function Auth() {
                   placeholder=' '
                   type='password'
                   autoComplete='current-password'
-                  className='peer h-12 sm:h-14'
+                  className='peer h-12 sm:h-14 pt-4 sm:pt-5'
                   {...rhfRegister('password', {
                     required: 'Password is required',
                     minLength: {
@@ -352,15 +328,7 @@ export default function Auth() {
                 />
                 <label
                   htmlFor='password'
-                  className='
-  absolute left-3
-  top-1/2 -translate-y-1/2
-  text-gray-400 text-sm
-  transition-all
-  peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm
-  peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-gray-600
-  bg-white px-1
-'
+                  className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-gray-600 peer-not-placeholder-shown:top-2 peer-not-placeholder-shown:translate-y-0 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-gray-600 bg-transparent px-1'
                 >
                   Password
                 </label>
@@ -379,7 +347,7 @@ export default function Auth() {
                       placeholder=' '
                       type='password'
                       autoComplete='new-password'
-                      className='peer h-12 sm:h-14'
+                      className='peer h-12 sm:h-14 pt-4 sm:pt-5'
                       {...rhfRegister('confirmPassword', {
                         validate: (v) => {
                           if (tab !== 'up') return true;
@@ -390,15 +358,7 @@ export default function Auth() {
                     />
                     <label
                       htmlFor='confirmPassword'
-                      className='
-  absolute left-3
-  top-1/2 -translate-y-1/2
-  text-gray-400 text-sm
-  transition-all
-  peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm
-  peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-gray-600
-  bg-white px-1
-'
+                      className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-gray-600 peer-not-placeholder-shown:top-2 peer-not-placeholder-shown:translate-y-0 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-gray-600 bg-transparent px-1'
                     >
                       Confirm Password
                     </label>

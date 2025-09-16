@@ -166,7 +166,7 @@ export default function Home() {
         {(recModeActive ? recError : isError) && <div className="mt-6 text-red-600">Failed to load restaurants.</div>}
         <div className="mt-6 sm:mt-12 flex items-center justify-between">
           <h2 className="text-xl font-semibold">{recModeActive ? 'Recommended' : 'Restaurants'}</h2>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mt-4 sm:mt-8">
             {recModeActive && (
               <button
                 className="text-sm font-medium text-red-600 hover:underline"
@@ -181,16 +181,7 @@ export default function Home() {
                 See All
               </button>
             )}
-            {/* {!recModeActive && (
-              <select
-                value={f.sort ?? 'rating_desc'}
-                onChange={(e)=>d(setSort(e.target.value as FiltersState['sort']))}
-                className="border rounded-md text-sm px-2 py-1 bg-white"
-                aria-label="Sort restaurants"
-              >
-                <option value="rating_desc">Top Rated</option>
-              </select>
-            )} */}
+            
             {!recModeActive && (isFetching || (hasQueryRaw && !hasQuery)) && (
               <span className="text-sm text-zinc-500"> Searching…</span>
             )}
