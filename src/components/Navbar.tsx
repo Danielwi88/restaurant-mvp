@@ -30,6 +30,14 @@ export default function Navbar() {
   const [user, setUser] = useState<StoredUser | null>(null);
   const nav = useNavigate();
   const location = useLocation();
+
+  // Detect auth mode from query string ("in" or "up"); default is Sign Up
+  const searchParams = new URLSearchParams(location.search);
+  const mode = (searchParams.get('mode') as 'in' | 'up' | null) ?? null;
+
+  // Track which button is being hovered to allow cross-fade effects
+  const [hovering, setHovering] = useState<null | 'in' | 'up'>(null);
+
   const isHome = location.pathname === '/';
   const qc = useQueryClient();
   const [scrolled, setScrolled] = useState(false);
@@ -61,7 +69,7 @@ export default function Navbar() {
     }
   }, []);
 
-  // Make navbar transparent with blur at top, turn white on scroll
+ 
   useEffect(() => {
     const onScroll = () => {
       setScrolled(typeof window !== 'undefined' ? window.scrollY > 4 : false);
@@ -84,12 +92,12 @@ export default function Navbar() {
   const avatarUrl = user?.avatarUrl ?? user?.avatar ?? null;
 
   const openCart = async () => {
-    // On restaurant detail page: skip backend sync; just open cart
+    
     if (location.pathname.startsWith('/restaurant/')) {
       nav('/cart');
       return;
     }
-    // Sync local cart to server before navigating from other pages
+    
     const tokenNow =
       typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     if (!tokenNow) {
@@ -229,12 +237,51 @@ export default function Navbar() {
 
           {!token ? (
             <div className='flex items-center gap-2'>
-              <Button className='bg-transparent h-12 w-[163px] text-gray-300 border-2 rounded-full text-[16px] font-bold' variant='outline' asChild aria-label='Sign in'>
-                <Link to='/auth?mode=in'>Sign In</Link>
-              </Button>
-              <Button className='bg-gray-300 h-12 w-[163px] text-gray-950 border-2 rounded-full text-[16px] font-bold' variant='ghost' asChild aria-label='Sign up'>
-                <Link to='/auth?mode=up'>Sign Up</Link>
-              </Button>
+              {/* Compute active states: default to Sign Up when mode is empty */}
+              {(() => {
+                const upActive = (mode === 'up' || !mode) && hovering !== 'in';
+                const inActive = mode === 'in' && hovering !== 'up';
+
+                const baseBtn =
+                  'h-12 w-[163px] rounded-full text-[16px] font-bold border-2 transition-colors';
+                const inactive = `bg-transparent border-gray-300 cursor-pointer ${
+                  !scrolled && isHome ? 'text-white' : 'text-gray-950'
+                }`;
+
+                return (
+                  <>
+                    <Button
+                      className={`${baseBtn} ${
+                        inActive
+                          ? 'bg-white text-gray-950 border-gray-300'
+                          : inactive
+                      }`}
+                      variant='outline'
+                      asChild
+                      aria-label='Sign in'
+                      onMouseEnter={() => setHovering('in')}
+                      onMouseLeave={() => setHovering(null)}
+                    >
+                      <Link to='/auth?mode=in'>Sign In</Link>
+                    </Button>
+
+                    <Button
+                      className={`${baseBtn} ${
+                        upActive
+                          ? 'bg-white text-gray-950 border-gray-300'
+                          : inactive
+                      }`}
+                      variant='outline'
+                      asChild
+                      aria-label='Sign up'
+                      onMouseEnter={() => setHovering('up')}
+                      onMouseLeave={() => setHovering(null)}
+                    >
+                      <Link to='/auth?mode=up'>Sign Up</Link>
+                    </Button>
+                  </>
+                );
+              })()}
             </div>
           ) : (
             <DropdownMenu>

@@ -12,12 +12,9 @@ export default function RestaurantCard({
   restaurant: Restaurant;
   userPos?: LatLong;
 }) {
-  // Hydrate missing coordinates from detail API only when authenticated
-  const token =
-    typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  
   const needsCoords = !restaurant.coords;
-  const canFetchDetail = !!token && needsCoords;
-  const { data } = useRestaurant(canFetchDetail ? restaurant.id : undefined);
+  const { data } = useRestaurant(needsCoords ? restaurant.id : undefined);
   const hydrated = data?.restaurant;
   const coords = restaurant.coords ?? hydrated?.coords;
   const km =
@@ -42,12 +39,12 @@ export default function RestaurantCard({
             )}
           </div>
 
-          <div className='my-auto text-gray-950 flex flex-col items-start gap-2'>
+          <div className='my-auto text-gray-950 flex flex-col items-start gap-2 sm:gap-3'>
             <div className='sm:text-lg font-semibold'>{restaurant.name}</div>
             <span>⭐ {restaurant.rating ?? '4.9'}</span>
 
             {/* <span className='text-zinc-400'>•</span> */}
-            <span className='text-md font-normal '>
+            <span className='text-md font-normal text-gray-950 '>
               {restaurant.address ?? 'Jakarta Selatan'}{' '}
               {distText ? `· ${distText}` : ''}
             </span>

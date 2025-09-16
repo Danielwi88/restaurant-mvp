@@ -1,20 +1,19 @@
+import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import { useRestaurants, useRecommendedRestaurants } from "@/services/queries/restaurants";
-import { useMenus } from "@/services/queries/menus";
-import { useAppDispatch, useAppSelector } from "@/features/store";
-import type { RootState } from "@/features/store";
-import { setQuery, setSort } from "@/features/filters/filtersSlice";
-import type { FiltersState } from "@/features/filters/filtersSlice";
+import RestaurantCard from "@/components/RestaurantCard";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "react-router-dom";
-import Footer from "@/components/Footer";
+import { setQuery } from "@/features/filters/filtersSlice";
+import type { RootState } from "@/features/store";
+import { useAppDispatch, useAppSelector } from "@/features/store";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useGeolocation } from "@/hooks/useGeolocation";
-import { useEffect, useMemo, useState } from "react";
+import { useMenus } from "@/services/queries/menus";
+import { useRecommendedRestaurants, useRestaurants } from "@/services/queries/restaurants";
 import type { Restaurant } from "@/types";
-import RestaurantCard from "@/components/RestaurantCard";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function Home() {
   const f = useAppSelector((s: RootState) => s.filters);
@@ -145,7 +144,7 @@ export default function Home() {
                   <img src={c.image} alt={c.label} className="w-full h-full object-contain" onError={(e)=>{ const img=e.currentTarget; if(!img.src.includes('/fallback1.png')){ img.onerror=null; img.src='/fallback1.png'; }}} />
                 </div>
               </div>
-                <div className="text-center text-sm font-bold leading-[28px] text-zinc-800">{c.label}</div>
+                <div className="text-center text-sm mt-1 font-bold leading-[28px] text-zinc-800">{c.label}</div>
               </div>
               
             );
@@ -165,7 +164,7 @@ export default function Home() {
           </div>
         )}
         {(recModeActive ? recError : isError) && <div className="mt-6 text-red-600">Failed to load restaurants.</div>}
-        <div className="mt-8 flex items-center justify-between">
+        <div className="mt-6 sm:mt-12 flex items-center justify-between">
           <h2 className="text-xl font-semibold">{recModeActive ? 'Recommended' : 'Restaurants'}</h2>
           <div className="flex items-center gap-3">
             {recModeActive && (
@@ -182,7 +181,7 @@ export default function Home() {
                 See All
               </button>
             )}
-            {!recModeActive && (
+            {/* {!recModeActive && (
               <select
                 value={f.sort ?? 'rating_desc'}
                 onChange={(e)=>d(setSort(e.target.value as FiltersState['sort']))}
@@ -191,7 +190,7 @@ export default function Home() {
               >
                 <option value="rating_desc">Top Rated</option>
               </select>
-            )}
+            )} */}
             {!recModeActive && (isFetching || (hasQueryRaw && !hasQuery)) && (
               <span className="text-sm text-zinc-500"> Searching…</span>
             )}
