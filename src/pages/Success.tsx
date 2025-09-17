@@ -27,33 +27,69 @@ export default function Success(){
 
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center px-4">
-      <div className="mb-6 text-[var(--color-brand,#D22B21)] font-semibold text-[22px] flex items-center gap-2">
-        <span className="inline-block size-6 rounded-full bg-[var(--color-brand,#D22B21)]" /> Foody
+      <div className="flex gap-x-[15px] mb-7">
+
+      <svg
+            xmlns='http://www.w3.org/2000/svg'
+            className='size-10 sm:size-[42px] font-semibold text-lg flex items-center gap-[15px] text-brand'
+            
+            viewBox='0 0 42 42'
+            fill='none'
+          >
+            <mask
+              id='mask0_39423_4673'
+              style={{ maskType: 'luminance' }}
+              maskUnits='userSpaceOnUse'
+              x='0'
+              y='0'
+              width='42'
+              height='42'
+            >
+              <path d='M42 0H0V42H42V0Z' fill='white' />
+            </mask>
+            <g mask='url(#mask0_39423_4673)'>
+              <path
+                fillRule='evenodd'
+                clipRule='evenodd'
+                d='M22.5 0H19.5V13.2832L14.524 0.967222L11.7425 2.09104L16.8474 14.726L7.21142 5.09009L5.09011 7.21142L14.3257 16.447L2.35706 11.2178L1.15596 13.9669L13.8202 19.5H0V22.5H13.8202L1.15597 28.0331L2.35706 30.7822L14.3257 25.553L5.09011 34.7886L7.21142 36.9098L16.8474 27.274L11.7425 39.909L14.524 41.0327L19.5 28.7169V42H22.5V28.7169L27.476 41.0327L30.2574 39.909L25.1528 27.274L34.7886 36.9098L36.9098 34.7886L27.6742 25.553L39.643 30.7822L40.8439 28.0331L28.1799 22.5H42V19.5H28.1797L40.8439 13.9669L39.643 11.2178L27.6742 16.447L36.9098 7.2114L34.7886 5.09009L25.1528 14.726L30.2574 2.09104L27.476 0.967222L22.5 13.2832V0Z'
+                fill='currentColor'
+              />
+            </g>
+          </svg>
+          <div className='hidden sm:block text-[32px] font-extrabold leading-[42px]'>
+            Foody
+          </div>
       </div>
+
       <div className="relative">
         {/* side notches */}
-        <span className="hidden sm:block absolute -left-3 top-1/2 -translate-y-1/2 size-6 rounded-full bg-white border border-neutral-200" aria-hidden="true" />
-        <span className="hidden sm:block absolute -right-3 top-1/2 -translate-y-1/2 size-6 rounded-full bg-white border border-neutral-200" aria-hidden="true" />
-        <Card className="max-w-md w-full text-left rounded-2xl shadow-sm">
+        <span className="hidden sm:block absolute -left-3 top-40 -translate-y-1/2 size-6 rounded-full bg-neutral-50 border border-gray-50" aria-hidden="true" />
+        <span className="hidden sm:block absolute -right-3 top-40 -translate-y-1/2 size-6 rounded-full bg-neutral-50 border border-neutral-50" aria-hidden="true" />
+        <span className="hidden sm:block absolute -left-3 top-95 -translate-y-1/2 size-6 rounded-full bg-neutral-50 border border-gray-50" aria-hidden="true" />
+        <span className="hidden sm:block absolute -right-3 top-95 -translate-y-1/2 size-6 rounded-full bg-neutral-50 border border-neutral-50" aria-hidden="true" />
+
+        <Card className="max-w-md w-full sm:w-[428px] text-left rounded-2xl shadow-sm">
           <CardContent className="p-0">
-            <div className="p-6 text-center">
-              <div className="mx-auto mb-3 size-12 rounded-full bg-emerald-100 grid place-items-center">
-                <span className="text-emerald-600 text-2xl">✓</span>
-              </div>
-              <div className="text-[20px] font-semibold">Payment Success</div>
-              <p className="text-zinc-600 text-sm mt-1">Your payment has been successfully processed.</p>
+            <div className="text-center flex flex-col items-center ">
+              
+              <img src="/icongreen.svg" alt="icon" width='64' height='64' className=""/>
+
+              <div className="text-[20px] font-extrabold pt-[2px] leading-[34px]">Payment Success</div>
+              
+              <p className="text-gray-950 font-normal text-sm mt-1 leading-[30px] text-[16px] pb-[6px]">Your payment has been successfully processed.</p>
             </div>
             <div className="border-t border-dashed border-neutral-200" />
-            <div className="p-6 space-y-3 text-sm">
-              <div className="flex justify-between"><span className="text-zinc-600">Date</span><span className="font-medium">{dateStr}</span></div>
-              <div className="flex justify-between"><span className="text-zinc-600">Payment Method</span><span className="font-medium">{method}</span></div>
-              <div className="flex justify-between"><span className="text-zinc-600">Price ({itemsCount} {itemsCount===1?'item':'items'})</span><span className="font-semibold">{formatCurrency(subtotal)}</span></div>
-              <div className="flex justify-between"><span className="text-zinc-600">Delivery Fee</span><span className="font-semibold">{formatCurrency(deliveryFee)}</span></div>
-              <div className="flex justify-between"><span className="text-zinc-600">Service Fee</span><span className="font-semibold">{formatCurrency(serviceFee)}</span></div>
-              <div className="border-t border-dashed border-neutral-200 pt-3 flex justify-between font-bold">
-                <span>Total</span><span>{formatCurrency(total)}</span>
+            <div className="px-5 pt-5 space-y-4 text-[16px] text-gray-950">
+
+              <div className="flex justify-between"><span className="text-gray-950">Date</span><span className="font-bold">{dateStr}</span></div>
+              <div className="flex justify-between"><span className="text-gray-950">Payment Method</span><span className="font-bold">{method}</span></div>
+              <div className="flex justify-between"><span className="text-gray-950">Price ({itemsCount} {itemsCount===1?'item':'items'})</span><span className="font-bold">{formatCurrency(subtotal)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-950">Delivery Fee</span><span className="font-bold">{formatCurrency(deliveryFee)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-950">Service Fee</span><span className="font-bold">{formatCurrency(serviceFee)}</span></div>
+              <div className="border-t border-dashed border-neutral-200 pt-3 flex justify-between font-normal text-lg">
+                <span>Total</span><span className="font-extrabold">{formatCurrency(total)}</span>
               </div>
-              <Button asChild className="w-full mt-2 rounded-full bg-[var(--color-brand,#D22B21)]">
+              <Button asChild className="w-full mt-2 h-12 rounded-full bg-[var(--color-brand,#D22B21)]">
                 <Link to="/orders">See My Orders</Link>
               </Button>
             </div>

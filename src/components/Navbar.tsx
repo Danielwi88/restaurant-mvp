@@ -31,7 +31,7 @@ export default function Navbar() {
   const nav = useNavigate();
   const location = useLocation();
   const [logoutOpen, setLogoutOpen] = useState(false);
-  // Detect auth mode from query string ("in" or "up"); default is Sign Up
+  
   const searchParams = new URLSearchParams(location.search);
   const mode = (searchParams.get('mode') as 'in' | 'up' | null) ?? null;
 
@@ -113,10 +113,11 @@ export default function Navbar() {
       showToast('Updating orders');
       const ops = items.map(async (it) => {
         if (it.serverCartItemId) {
-          // PUT update quantity
+          
           await apiPut(`cart/${it.serverCartItemId}`, { quantity: it.qty });
         } else if (it.restaurantId) {
-          // No server id yet: create with full quantity
+          
+
           const restaurantIdNum = Number(it.restaurantId);
           const menuIdNum = Number(it.id);
           const res = await apiPost<{

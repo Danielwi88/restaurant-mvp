@@ -23,7 +23,7 @@ export default function CartPage() {
   const [syncing, setSyncing] = useState(false);
   const nav = useNavigate();
 
-  // Group items by restaurant
+ 
   const groups = useMemo(() => {
     const m = new Map<string, CartItem[]>();
     for (const it of items) {

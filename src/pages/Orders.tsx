@@ -15,6 +15,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency } from '@/lib/format';
 import { showToast } from '@/lib/toast';
 import { useOrders } from '@/services/queries/orders';
+import { useServerCart } from '@/services/queries/cart';
+import { useRestaurantMenuImages } from '@/services/queries/menu-images';
 import { useCreateReview } from '@/services/queries/reviews';
 import { useQueryClient } from '@tanstack/react-query';
 import { MapPinIcon, StarIcon } from 'lucide-react';
@@ -77,7 +79,8 @@ export default function Orders() {
     rname?: string;
   } | null>(null);
   const [user, setUser] = useState<StoredUser | null>(null);
-   const nav = useNavigate();
+  const [canFetchCart, setCanFetchCart] = useState(false);
+  const nav = useNavigate();
   const qc = useQueryClient();
   const avatarUrl = user?.avatarUrl ?? user?.avatar ?? null;
   const name = user?.name || 'John Doe';
@@ -87,6 +90,7 @@ export default function Orders() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       setUser(null);
+      setCanFetchCart(false);
       qc.clear();
       showToast('Logged out successfully', 'success');
       nav('/');
@@ -102,6 +106,46 @@ export default function Orders() {
     );
   }, [data, q]);
 
+  const { data: serverCart } = useServerCart(canFetchCart);
+
+  const cartImageMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const item of serverCart?.items ?? []) {
+      if (item.id && item.imageUrl) {
+        map.set(String(item.id), item.imageUrl);
+      }
+    }
+    return map;
+  }, [serverCart]);
+
+  const missingMenuRequests = useMemo(() => {
+    const grouped = new Map<string, Set<string>>();
+    for (const order of filtered) {
+      const first = order.items[0];
+      if (!first) continue;
+      const firstId = first.id !== undefined && first.id !== null ? String(first.id) : undefined;
+      if (!firstId) continue;
+      if (first.imageUrl || cartImageMap.has(firstId)) continue;
+      const rid = order.restaurantId !== undefined && order.restaurantId !== null
+        ? String(order.restaurantId)
+        : undefined;
+      if (!rid) continue;
+      const set = grouped.get(rid) ?? new Set<string>();
+      set.add(firstId);
+      grouped.set(rid, set);
+    }
+    return Array.from(grouped.entries()).map(([restaurantId, ids]) => ({
+      restaurantId,
+      menuIds: Array.from(ids.values()),
+    }));
+  }, [filtered, cartImageMap]);
+
+  const { data: restaurantImageMapData } = useRestaurantMenuImages(missingMenuRequests, {
+    enabled: missingMenuRequests.length > 0,
+  });
+
+  const restaurantImageMap = useMemo(() => restaurantImageMapData ?? new Map<string, string>(), [restaurantImageMapData]);
+
   const tabs: { id: StatusTab; label: string }[] = [
     { id: 'preparing', label: 'Preparing' },
     { id: 'on_the_way', label: 'On the Way' },
@@ -114,18 +158,20 @@ export default function Orders() {
   useEffect(() => {
     try {
       const raw = localStorage.getItem('user');
-      if (!raw) return;
-      const u = JSON.parse(raw) as StoredUser & { email?: string; phone?: string };
-      setUser(u);
-      setForm((f) => ({
-        ...f,
-        name: u.name ?? '',
-        email: u.email ?? '',
-        phone: u.phone ?? '',
-      }));
+      if (raw) {
+        const u = JSON.parse(raw) as StoredUser & { email?: string; phone?: string };
+        setUser(u);
+        setForm((f) => ({
+          ...f,
+          name: u.name ?? '',
+          email: u.email ?? '',
+          phone: u.phone ?? '',
+        }));
+      }
     } catch {
       // ignore JSON parse errors
     }
+    setCanFetchCart(!!localStorage.getItem('token'));
   }, []);
 
   return (
@@ -236,6 +282,14 @@ export default function Orders() {
                     const summary = first
                       ? `${first.qty} × ${formatCurrency(first.price)}`
                       : '';
+                    const firstId = first?.id !== undefined && first?.id !== null
+                      ? String(first.id)
+                      : null;
+                    const resolvedImage =
+                      (firstId ? cartImageMap.get(firstId) : undefined) ??
+                      (firstId ? restaurantImageMap.get(firstId) : undefined) ??
+                      (first?.imageUrl || undefined) ??
+                      '/fallback2.png';
                     return (
                       <Card
                         key={order.id}
@@ -252,7 +306,7 @@ export default function Orders() {
                           <div className='flex items-center gap-3'>
 
                             <img
-                              src={first?.imageUrl || '/fallback2.png'}
+                              src={resolvedImage}
                               alt={first?.name || 'food'}
                               className="h-16 w-16 object-cover rounded-xl"
                               onError={(e)=>{ const img=e.currentTarget as HTMLImageElement; if(!img.src.includes('/fallback2.png')){ img.onerror=null; img.src='/fallback2.png'; }}}
