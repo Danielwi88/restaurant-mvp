@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
     <footer className="mt-16 bg-[#0E1116] text-white/90">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-0 py-10 sm:py-20  sm:flex justify-between">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-5 lg:px-0 py-10 sm:py-20 sm:flex justify-between">
         <div className="">
           <div className="flex items-center gap-[15px] font-semibold text-lg">
             <svg
@@ -40,7 +40,7 @@ export default function Footer() {
             Enjoy homemade flavors & chef's signature dishes, freshly prepared every day. Order online or visit our nearest branch.
           </p>
           <p className="mt-4 sm:mt-10 mb-5">Follow on Social Media</p>
-          <div className="flex gap-3 mt-4 text-white/70"> 
+          <div className="flex gap-3 mt-4 text-white/70 mb-6"> 
 
             <span>
               <img src="/fbicon.svg" alt="fb" width="40" height="40"/>
@@ -55,10 +55,12 @@ export default function Footer() {
           </div>
             
         </div>
-        <div className="sm:w-[200px] max-w-[200px]">
-          <div className="text-sm sm:text-[16px] leading-[30px] font-extrabold mb-4 sm:mb-5">Explore</div>
 
-          <ul className="space-y-2 text-sm text-white/80">
+
+        <div className="grid grid-cols-2 sm:block ">
+        <div className="sm:w-[200px] max-w-[200px] text-neutral-25 leading-[28px] space-y-4 ">
+          <div className="text-sm sm:text-[16px] leading-[30px] font-extrabold mb-4 sm:mb-5">Explore</div>
+          <ul className="space-y-4 text-sm text-neutral-25 leading-[28px]">
             <li>All Food</li>
             <li>Nearby</li>
             <li>Discount</li>
@@ -67,15 +69,13 @@ export default function Footer() {
             <li>Lunch</li>
           </ul>
           
-          <div>
           
-        </div>
         
         </div>
-        <div>
+        <div className="sm:hidden text-neutral-25 leading-[28px] space-y-4">
 
         <div className="sm:w-[200px] max-w-[200px] text-sm sm:text-[16px] leading-[30px] font-extrabold mb-4 sm:mb-5">Help</div>
-          <ul className="space-y-2 text-sm text-white/80">
+          <ul className="space-y-4 text-sm text-neutral-25 leading-[28px]">
             <li>How to Order</li>
             <li>Payment Methods</li>
             <li>Track My Order</li>
@@ -83,10 +83,26 @@ export default function Footer() {
             <li>Contact Us</li>
           </ul>
           <div className="flex justify-start self-end text-xs text-white/40 mt-10">© Danielwi_wph_010</div>
-        </div>
         
+        </div>
+
+        </div>
+
+
+        <div className="hidden sm:block text-neutral-25 leading-[28px] space-y-4">
+
+<div className="sm:w-[200px] max-w-[200px] text-sm sm:text-[16px] leading-[30px] font-extrabold mb-4 sm:mb-5">Help</div>
+          <ul className="space-y-4 text-sm text-neutral-25 leading-[28px] ">
+            <li>How to Order</li>
+            <li>Payment Methods</li>
+            <li>Track My Order</li>
+            <li>FAQ</li>
+            <li>Contact Us</li>
+          </ul>
+          <div className="flex justify-start self-end text-xs text-white/40 mt-10">© Danielwi_wph_010</div>
 
         
+        </div>
         
       </div>
     </footer>

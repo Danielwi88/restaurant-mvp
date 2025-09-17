@@ -92,7 +92,7 @@ export const useCreateOrder = () =>
 export const useAddCartItem = () =>
   useMutation({
     mutationFn: async (body: AddCartBody) => {
-      // Body example: { restaurantId: 26, menuId: 32, quantity: 2 }
+      
       const res = await apiPost<AddCartResponse>("cart", body);
       return res;
     },
@@ -110,3 +110,4 @@ export const useRemoveCartItem = () =>
       showToast(msg, 'success');
     },
   });
+

@@ -68,7 +68,7 @@ export default function Profile() {
   return (
     <>
       <Navbar />
-      <div className='max-w-[1200px] mx-auto px-5 sm:px-0 py-8 flex md:flex-cols-2 gap-8'>
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-5 py-8 lg:px-0 lg:mx-auto grid md:grid-cols-[240px_1fr] gap-8">
         <aside className='hidden sm:block w-[240px]'>
           <Card className='rounded-2xl shadow-sm'>
             <CardContent className='p-0 space-y-12'>
@@ -111,8 +111,8 @@ export default function Profile() {
           </Card>
         </aside>
 
-        <section>
-          <h2 className='w-full sm:w-[524px] text-2xl sm:text-[32px] font-extrabold mb-6'>
+        <section className="w-full min-w-0 md:max-w-[524px] lg:w-[524px]">
+          <h2 className='w-full text-2xl sm:text-[32px] font-extrabold mb-6'>
             Profile
           </h2>
           <Card className='rounded-2xl shadow-sm'>

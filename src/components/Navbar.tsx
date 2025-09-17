@@ -159,7 +159,7 @@ export default function Navbar() {
           : 'bg-transparent border-transparent '
       }`}
     >
-      <div className='max-w-[1200px] mx-auto px-4 sm:px-0 h-16 sm:h-20 flex items-center justify-between'>
+      <div className='max-w-[1200px] px-4 mx-auto sm:px-5 lg:px-0 h-16 sm:h-20 flex items-center justify-between'>
         <Link
           to='/'
           className={`font-semibold text-lg flex items-center gap-[15px] transition-colors ${

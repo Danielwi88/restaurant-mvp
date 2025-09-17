@@ -1,4 +1,3 @@
-// src/pages/RestaurantDetail.tsx
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -42,8 +41,7 @@ export default function RestaurantDetail() {
       images[0] ?? HERO_FALLBACKS[0],
       images[1] ?? HERO_FALLBACKS[1],
       images[2] ?? HERO_FALLBACKS[2],
-      // For the 4th image: prefer images[3], then fallback to images[0],
-      // and finally to fallback6.png via onError handler below.
+      
       (images[3] ?? images[0]) ?? HERO_FALLBACKS[3],
     ];
   }, [images]);
@@ -189,7 +187,7 @@ export default function RestaurantDetail() {
           <div className="flex items-center gap-4">
             <Avatar className="size-14">
               <AvatarImage src={restaurant?.logoUrl} alt={restaurant?.name} />
-              <AvatarFallback className="text-zinc-700">{(restaurant?.name ?? "?").slice(0,2)}</AvatarFallback>
+              {/* <AvatarFallback className="text-zinc-700">{(restaurant?.name ?? "?").slice(0,2)}</AvatarFallback> */}
             </Avatar>
             <div>
               <div className="text-2xl font-semibold">{restaurant?.name}</div>

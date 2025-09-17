@@ -1,13 +1,8 @@
-import { useState, useMemo } from 'react';
-import { useOrders } from '@/services/queries/orders';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { formatCurrency } from '@/lib/format';
-import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { MapPinIcon, StarIcon } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -15,11 +10,17 @@ import {
   DialogTitle,
   LogoutDialog,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useCreateReview } from '@/services/queries/reviews';
-import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { formatCurrency } from '@/lib/format';
 import { showToast } from '@/lib/toast';
+import { useOrders } from '@/services/queries/orders';
+import { useCreateReview } from '@/services/queries/reviews';
+import { useQueryClient } from '@tanstack/react-query';
+import { MapPinIcon, StarIcon } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 
 type StatusTab =
   | 'preparing'
@@ -29,9 +30,38 @@ type StatusTab =
   | 'canceled'
   | 'all';
 
+  
 type StoredUser = { name?: string; avatar?: string; avatarUrl?: string };
 
+type OrderItem = {
+  id?: string | number;
+  name: string;
+  imageUrl?: string | null;
+  price: number;
+  qty: number;
+};
+
+type Order = {
+  id: string | number;
+  items: OrderItem[];
+  total: number;
+  transactionId: string;
+  restaurantId: string | number;
+  restaurantName?: string | null;
+  createdAt: string | Date;
+};
+
 export default function Orders() {
+  
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    currentPassword: '',
+    newPassword: '',
+  });
+
+  
   const [status, setStatus] = useState<StatusTab>('all');
   const [q, setQ] = useState('');
   const { data, isLoading } = useOrders(
@@ -61,14 +91,14 @@ export default function Orders() {
       showToast('Logged out successfully', 'success');
       nav('/');
     };    
+
   const filtered = useMemo(() => {
-    const list = data ?? [];
+    const list: Order[] = Array.isArray(data) ? (data as Order[]) : [];
     const s = q.trim().toLowerCase();
     if (!s) return list;
-    return list.filter(
-      (o) =>
-        o.items.some((i) => i.name.toLowerCase().includes(s)) ||
-        new Date(o.createdAt).toLocaleString().toLowerCase().includes(s)
+    return list.filter((order) =>
+      order.items.some((i) => i.name.toLowerCase().includes(s)) ||
+      new Date(order.createdAt).toLocaleString().toLowerCase().includes(s)
     );
   }, [data, q]);
 
@@ -81,13 +111,30 @@ export default function Orders() {
     { id: 'all', label: 'All' },
   ];
 
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('user');
+      if (!raw) return;
+      const u = JSON.parse(raw) as StoredUser & { email?: string; phone?: string };
+      setUser(u);
+      setForm((f) => ({
+        ...f,
+        name: u.name ?? '',
+        email: u.email ?? '',
+        phone: u.phone ?? '',
+      }));
+    } catch {
+      // ignore JSON parse errors
+    }
+  }, []);
+
   return (
     <>
       <Navbar />
-      <div className='max-w-6xl mx-auto px-4 py-8 grid md:grid-cols-[220px,1fr] gap-6'>
+      <div className='max-w-[1200px] bg-neutral-50 mt-4 sm:mt-12 mx-auto px-4 sm:px-5 lg:px-0 md:grid grid-cols-[240px_1fr] gap-8'>
         {/* Left menu (profile-style) */}
-        <aside className='hidden sm:block w-[240px]'>
-          <Card className='rounded-2xl shadow-sm'>
+        <aside className='hidden md:block w-[240px] border-none'>
+          <Card className='rounded-2xl shadow-[0_0_20px_rgba(203,202,202,0.25)]'>
             <CardContent className='p-0 space-y-12'>
               <div className='flex items-center gap-3'>
                 <Avatar className='size-10 sm:size-12 shrink-0 aspect-square bg-black p-0'>
@@ -96,9 +143,8 @@ export default function Orders() {
                     alt={name}
                     className='object-contain object-center'
                   />
-                  <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
-                <div className='font-medium'>{'John Doe'}</div>
+                <div className='font-medium'>{form.name || 'User'}</div>
               </div>
 
               <div className='space-y-6 text-sm'>
@@ -132,25 +178,46 @@ export default function Orders() {
         {/* Right content */}
         <section>
           <h2 className='text-2xl font-semibold mb-4'>My Orders</h2>
-          <Card className='rounded-2xl shadow-sm'>
-            <CardContent className='p-4'>
-              <div className='flex items-center gap-3'>
-                <Input
-                  placeholder='Search'
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  className='max-w-xs'
-                />
+          <Card className='rounded-2xl shadow-[0_0_20px_rgba(203,202,202,0.25)] border-none bg-white'>
+            <CardContent className='sm:p-2'>
+              <div className='flex items-center gap-3 '>
+                <div className="relative w-full max-w-[598px]  ">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2  text-gray-500 font-normal">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                    >
+                      <path
+                        d="M17.5 17.5L14.1667 14.1667M15.8333 9.16667C15.8333 10.9348 15.131 12.6305 13.8807 13.8807C12.6305 15.131 10.9348 15.8333 9.16667 15.8333C7.39856 15.8333 5.70286 15.131 4.45262 13.8807C3.20238 12.6305 2.5 10.9348 2.5 9.16667C2.5 7.39856 3.20238 5.70286 4.45262 4.45262C5.70286 3.20238 7.39856 2.5 9.16667 2.5C10.9348 2.5 12.6305 3.20238 13.8807 4.45262C15.131 5.70286 15.8333 7.39856 15.8333 9.16667Z"
+                        stroke="currentColor"
+                        strokeWidth="1.25"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                  <Input
+                    type="text"
+                    placeholder="Search"
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    className="pl-10 rounded-full text-gray-600 text-sm font-normal border-gray-300"
+                  />
+                </div>
               </div>
-              <div className='mt-3 flex flex-wrap gap-2'>
+              <div className='mt-5 flex flex-wrap gap-y-2 gap-x-2 sm:gap-x-3'>
+                <span className='text-sm sm:text-[18px] font-bold flex items-center'>Status</span>
                 {tabs.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => setStatus(t.id)}
-                    className={`px-3 py-1.5 rounded-full border text-sm ${
+                    className={`px-4 py-2 rounded-full border  text-sm sm:text-[16px] ${
                       status === t.id
-                        ? 'bg-[var(--color-brand,#D22B21)] text-white border-transparent'
-                        : 'bg-white text-zinc-700 border-neutral-300'
+                        ? ' text-brand border-brand bg-[#FFECEC]'
+                        : 'bg-white text-neutral-950 border-gray-300'
                     }`}
                   >
                     {t.label}
@@ -158,59 +225,63 @@ export default function Orders() {
                 ))}
               </div>
 
-              <div className='mt-4 space-y-4'>
+              <div className='mt-5 space-y-4 '>
                 {isLoading && (
-                  <div className='text-zinc-500'>Loading orders…</div>
+                  <div className='text-gray-500'>Loading orders…</div>
                 )}
 
                 {!isLoading &&
-                  filtered.map((o) => {
-                    const first = o.items[0];
+                  filtered.map((order) => {
+                    const first = order.items[0];
                     const summary = first
                       ? `${first.qty} × ${formatCurrency(first.price)}`
                       : '';
                     return (
                       <Card
-                        key={o.id}
-                        className='rounded-xl border border-neutral-200'
+                        key={order.id}
+                        className='rounded-2xl border-none shadow-[0_0_20px_rgba(203,202,202,0.25)]'
                       >
-                        <CardContent className='p-4'>
+                        <CardContent className='p-1'>
+                          <div className='flex gap-2 mb-4'>
+                          <img src="/iconRectangle.png" alt="icon" width='32' height='32' />
+
+                          <div className="text-sm leading-[28px] sm:text-lg sm:leading-[32px] font-bold">{order.restaurantName || 'Restaurant'}</div>
+
+                          </div>
+
                           <div className='flex items-center gap-3'>
+
                             <img
-                              src={first?.imageUrl || '/fallback1.png'}
+                              src={first?.imageUrl || '/fallback2.png'}
                               alt={first?.name || 'food'}
-                              className='size-12 rounded-md object-cover'
-                              onError={(e) => {
-                                const img = e.currentTarget as HTMLImageElement;
-                                if (!img.src.includes('/fallback1.png')) {
-                                  img.onerror = null;
-                                  img.src = '/fallback1.png';
-                                }
-                              }}
+                              className="h-16 w-16 object-cover rounded-xl"
+                              onError={(e)=>{ const img=e.currentTarget as HTMLImageElement; if(!img.src.includes('/fallback2.png')){ img.onerror=null; img.src='/fallback2.png'; }}}
                             />
+
                             <div className='flex-1'>
-                              <div className='font-medium'>
+                              <div className='font-medium text-sm sm:text-[16px] leading-[28px]'>
                                 {first?.name || 'Order'}
                               </div>
-                              <div className='text-xs text-zinc-600'>
+                              <div className='text-sm sm:text-[16px] text-gray-950 font-extrabold'>
                                 {summary}
                               </div>
                             </div>
-                            <div className='text-right'>
-                              <div className='text-xs text-zinc-500'>Total</div>
-                              <div className='font-bold'>
-                                {formatCurrency(o.total)}
+                            
+                          </div>
+                          <div className='mt-3 sm:mt-8 flex justify-between'>
+                            <div className='text-left'>
+                              <div className='text-[16px] text-zinc-500'>Total</div>
+                              <div className='font-extrabold sm:text-xl'>
+                                {formatCurrency(order.total)}
                               </div>
                             </div>
-                          </div>
-                          <div className='mt-3 flex justify-end'>
                             <Button
-                              className='rounded-full px-5'
+                              className='rounded-full px-5 h-[48px] w-[240px]'
                               onClick={() => {
                                 setCurrent({
-                                  tx: o.transactionId,
-                                  rid: o.restaurantId,
-                                  rname: o.restaurantName,
+                                  tx: order.transactionId,
+                                  rid: order.restaurantId as string | undefined,
+                                  rname: order.restaurantName || undefined,
                                 });
                                 setReviewOpen(true);
                               }}
@@ -239,7 +310,7 @@ export default function Orders() {
 
       {/* Give Review Modal */}
       <Dialog open={reviewOpen} onOpenChange={setReviewOpen}>
-        <DialogContent className='sm:max-w-md rounded-2xl'>
+        <DialogContent className=' sm:max-w-md rounded-2xl'>
           <DialogHeader>
             <DialogTitle>Give Review</DialogTitle>
           </DialogHeader>
