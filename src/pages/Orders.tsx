@@ -23,7 +23,6 @@ import { MapPinIcon, StarIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-
 type StatusTab =
   | 'preparing'
   | 'on_the_way'
@@ -32,7 +31,6 @@ type StatusTab =
   | 'canceled'
   | 'all';
 
-  
 type StoredUser = { name?: string; avatar?: string; avatarUrl?: string };
 
 type OrderItem = {
@@ -54,7 +52,6 @@ type Order = {
 };
 
 export default function Orders() {
-  
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -63,7 +60,6 @@ export default function Orders() {
     newPassword: '',
   });
 
-  
   const [status, setStatus] = useState<StatusTab>('all');
   const [q, setQ] = useState('');
   const { data, isLoading } = useOrders(
@@ -87,22 +83,23 @@ export default function Orders() {
 
   const [logoutOpen, setLogoutOpen] = useState(false);
   const logout = () => {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      setUser(null);
-      setCanFetchCart(false);
-      qc.clear();
-      showToast('Logged out successfully', 'success');
-      nav('/');
-    };    
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    setCanFetchCart(false);
+    qc.clear();
+    showToast('Logged out successfully', 'success');
+    nav('/');
+  };
 
   const filtered = useMemo(() => {
     const list: Order[] = Array.isArray(data) ? (data as Order[]) : [];
     const s = q.trim().toLowerCase();
     if (!s) return list;
-    return list.filter((order) =>
-      order.items.some((i) => i.name.toLowerCase().includes(s)) ||
-      new Date(order.createdAt).toLocaleString().toLowerCase().includes(s)
+    return list.filter(
+      (order) =>
+        order.items.some((i) => i.name.toLowerCase().includes(s)) ||
+        new Date(order.createdAt).toLocaleString().toLowerCase().includes(s)
     );
   }, [data, q]);
 
@@ -123,12 +120,16 @@ export default function Orders() {
     for (const order of filtered) {
       const first = order.items[0];
       if (!first) continue;
-      const firstId = first.id !== undefined && first.id !== null ? String(first.id) : undefined;
+      const firstId =
+        first.id !== undefined && first.id !== null
+          ? String(first.id)
+          : undefined;
       if (!firstId) continue;
       if (first.imageUrl || cartImageMap.has(firstId)) continue;
-      const rid = order.restaurantId !== undefined && order.restaurantId !== null
-        ? String(order.restaurantId)
-        : undefined;
+      const rid =
+        order.restaurantId !== undefined && order.restaurantId !== null
+          ? String(order.restaurantId)
+          : undefined;
       if (!rid) continue;
       const set = grouped.get(rid) ?? new Set<string>();
       set.add(firstId);
@@ -140,11 +141,17 @@ export default function Orders() {
     }));
   }, [filtered, cartImageMap]);
 
-  const { data: restaurantImageMapData } = useRestaurantMenuImages(missingMenuRequests, {
-    enabled: missingMenuRequests.length > 0,
-  });
+  const { data: restaurantImageMapData } = useRestaurantMenuImages(
+    missingMenuRequests,
+    {
+      enabled: missingMenuRequests.length > 0,
+    }
+  );
 
-  const restaurantImageMap = useMemo(() => restaurantImageMapData ?? new Map<string, string>(), [restaurantImageMapData]);
+  const restaurantImageMap = useMemo(
+    () => restaurantImageMapData ?? new Map<string, string>(),
+    [restaurantImageMapData]
+  );
 
   const tabs: { id: StatusTab; label: string }[] = [
     { id: 'preparing', label: 'Preparing' },
@@ -159,7 +166,10 @@ export default function Orders() {
     try {
       const raw = localStorage.getItem('user');
       if (raw) {
-        const u = JSON.parse(raw) as StoredUser & { email?: string; phone?: string };
+        const u = JSON.parse(raw) as StoredUser & {
+          email?: string;
+          phone?: string;
+        };
         setUser(u);
         setForm((f) => ({
           ...f,
@@ -227,35 +237,37 @@ export default function Orders() {
           <Card className='rounded-2xl shadow-[0_0_20px_rgba(203,202,202,0.25)] border-none bg-white'>
             <CardContent className='sm:p-2'>
               <div className='flex items-center gap-3 '>
-                <div className="relative w-full max-w-[598px]  ">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2  text-gray-500 font-normal">
+                <div className='relative w-full max-w-[598px]  '>
+                  <span className='absolute left-3 top-1/2 -translate-y-1/2  text-gray-500 font-normal'>
                     <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 20 20"
-                      fill="none"
+                      xmlns='http://www.w3.org/2000/svg'
+                      width='20'
+                      height='20'
+                      viewBox='0 0 20 20'
+                      fill='none'
                     >
                       <path
-                        d="M17.5 17.5L14.1667 14.1667M15.8333 9.16667C15.8333 10.9348 15.131 12.6305 13.8807 13.8807C12.6305 15.131 10.9348 15.8333 9.16667 15.8333C7.39856 15.8333 5.70286 15.131 4.45262 13.8807C3.20238 12.6305 2.5 10.9348 2.5 9.16667C2.5 7.39856 3.20238 5.70286 4.45262 4.45262C5.70286 3.20238 7.39856 2.5 9.16667 2.5C10.9348 2.5 12.6305 3.20238 13.8807 4.45262C15.131 5.70286 15.8333 7.39856 15.8333 9.16667Z"
-                        stroke="currentColor"
-                        strokeWidth="1.25"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                        d='M17.5 17.5L14.1667 14.1667M15.8333 9.16667C15.8333 10.9348 15.131 12.6305 13.8807 13.8807C12.6305 15.131 10.9348 15.8333 9.16667 15.8333C7.39856 15.8333 5.70286 15.131 4.45262 13.8807C3.20238 12.6305 2.5 10.9348 2.5 9.16667C2.5 7.39856 3.20238 5.70286 4.45262 4.45262C5.70286 3.20238 7.39856 2.5 9.16667 2.5C10.9348 2.5 12.6305 3.20238 13.8807 4.45262C15.131 5.70286 15.8333 7.39856 15.8333 9.16667Z'
+                        stroke='currentColor'
+                        strokeWidth='1.25'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
                       />
                     </svg>
                   </span>
                   <Input
-                    type="text"
-                    placeholder="Search"
+                    type='text'
+                    placeholder='Search'
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
-                    className="pl-10 rounded-full text-gray-600 text-sm font-normal border-gray-300"
+                    className='pl-10 rounded-full text-gray-600 text-sm font-normal border-gray-300'
                   />
                 </div>
               </div>
               <div className='mt-5 flex flex-wrap gap-y-2 gap-x-2 sm:gap-x-3'>
-                <span className='text-sm sm:text-[18px] font-bold flex items-center'>Status</span>
+                <span className='text-sm sm:text-[18px] font-bold flex items-center'>
+                  Status
+                </span>
                 {tabs.map((t) => (
                   <button
                     key={t.id}
@@ -282,9 +294,10 @@ export default function Orders() {
                     const summary = first
                       ? `${first.qty} × ${formatCurrency(first.price)}`
                       : '';
-                    const firstId = first?.id !== undefined && first?.id !== null
-                      ? String(first.id)
-                      : null;
+                    const firstId =
+                      first?.id !== undefined && first?.id !== null
+                        ? String(first.id)
+                        : null;
                     const resolvedImage =
                       (firstId ? cartImageMap.get(firstId) : undefined) ??
                       (firstId ? restaurantImageMap.get(firstId) : undefined) ??
@@ -297,19 +310,30 @@ export default function Orders() {
                       >
                         <CardContent className='p-1'>
                           <div className='flex gap-2 mb-4'>
-                          <img src="/iconRectangle.png" alt="icon" width='32' height='32' />
+                            <img
+                              src='/iconRectangle.png'
+                              alt='icon'
+                              width='32'
+                              height='32'
+                            />
 
-                          <div className="text-sm leading-[28px] sm:text-lg sm:leading-[32px] font-bold">{order.restaurantName || 'Restaurant'}</div>
-
+                            <div className='text-sm leading-[28px] sm:text-lg sm:leading-[32px] font-bold'>
+                              {order.restaurantName || 'Restaurant'}
+                            </div>
                           </div>
 
                           <div className='flex items-center gap-3'>
-
                             <img
                               src={resolvedImage}
                               alt={first?.name || 'food'}
-                              className="h-16 w-16 object-cover rounded-xl"
-                              onError={(e)=>{ const img=e.currentTarget as HTMLImageElement; if(!img.src.includes('/fallback2.png')){ img.onerror=null; img.src='/fallback2.png'; }}}
+                              className='h-16 w-16 object-cover rounded-xl'
+                              onError={(e) => {
+                                const img = e.currentTarget as HTMLImageElement;
+                                if (!img.src.includes('/fallback2.png')) {
+                                  img.onerror = null;
+                                  img.src = '/fallback2.png';
+                                }
+                              }}
                             />
 
                             <div className='flex-1'>
@@ -320,11 +344,12 @@ export default function Orders() {
                                 {summary}
                               </div>
                             </div>
-                            
                           </div>
                           <div className='mt-3 sm:mt-8 flex justify-between'>
                             <div className='text-left'>
-                              <div className='text-[16px] text-zinc-500'>Total</div>
+                              <div className='text-[16px] text-zinc-500'>
+                                Total
+                              </div>
                               <div className='font-extrabold sm:text-xl'>
                                 {formatCurrency(order.total)}
                               </div>
@@ -368,7 +393,7 @@ export default function Orders() {
           <DialogHeader>
             <DialogTitle>Give Review</DialogTitle>
           </DialogHeader>
-          <div className='text-sm text-zinc-700'>Give Rating</div>
+          <div className='text-sm text-gray-950'>Give Rating</div>
           <div className='mt-1 flex items-center gap-1'>
             {Array.from({ length: 5 }).map((_, i) => {
               const idx = i + 1;

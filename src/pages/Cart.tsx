@@ -1,20 +1,19 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useMemo } from "react";
-import { useAppDispatch, useAppSelector } from "@/features/store";
-import type { RootState } from "@/features/store";
-import { removeFromCart, setServerCartItemId, incrementQty, decrementQty } from "@/features/cart/cartSlice";
-import { showToast } from "@/lib/toast";
-import { formatCurrency } from "@/lib/format";
-import { Card, CardContent } from "@/components/ui/card";
+import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ChevronRightIcon, MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { decrementQty, incrementQty, setServerCartItemId } from "@/features/cart/cartSlice";
+import type { RootState } from "@/features/store";
+import { useAppDispatch, useAppSelector } from "@/features/store";
+import { formatCurrency } from "@/lib/format";
+import { showToast } from "@/lib/toast";
+import { apiPost, apiPut } from "@/services/api/axios";
 import { useRestaurant } from "@/services/queries/restaurants";
 import type { CartItem } from "@/types";
-import Navbar from "@/components/Navbar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
-import { apiPost, apiPut } from "@/services/api/axios";
+import { ChevronRightIcon, MinusIcon, PlusIcon } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function CartPage() {
   const d = useAppDispatch();
@@ -35,26 +34,26 @@ export default function CartPage() {
     return Array.from(m.entries()).map(([restaurantId, items]) => ({ restaurantId, items }));
   }, [items]);
 
-  const grandTotal = items.reduce((a, b) => a + b.price * b.qty, 0);
+  // const grandTotal = items.reduce((a, b) => a + b.price * b.qty, 0);
 
   const QtyControl = ({ id, qty, pending }: { id: string; qty: number; pending?: boolean }) => (
     <div className="flex items-center gap-2">
       <button
-        className="size-8 rounded-full border border-neutral-300 grid place-items-center text-zinc-700 disabled:opacity-60"
+        className="size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 disabled:opacity-60"
         aria-label="Decrease quantity"
         disabled={pending}
         onClick={() => { d(decrementQty({ id })); }}
       >
-        <MinusIcon className="size-4" />
+        <MinusIcon className="size-5 sm:size-6" />
       </button>
-      <div className="w-5 text-center text-sm font-medium">{qty}</div>
+      <div className="px-4 text-center text-[16px] sm:text-lg font-semibold">{qty}</div>
       <button
-        className="size-8 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center disabled:opacity-60"
+        className="size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center disabled:opacity-60"
         aria-label="Increase quantity"
         disabled={pending}
         onClick={() => { d(incrementQty({ id })); }}
       >
-        <PlusIcon className="size-4" />
+        <PlusIcon className="size-5 sm:size-6" />
       </button>
     </div>
   );
@@ -94,14 +93,15 @@ export default function CartPage() {
     const { data } = useRestaurant(canFetch ? restaurantId : undefined);
     const name = data?.restaurant?.name ?? 'Restaurant';
     return (
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm font-semibold text-zinc-800">
+      <div className="flex items-center justify-start ">
+        <div className="flex items-center gap-2 text-sm sm:text-lg font-semibold text-gray-950">
           <img src={data?.restaurant?.logoUrl || '/fallback1.png'} alt={name} className="size-5 rounded-sm object-cover" onError={(e)=>{ const img=e.currentTarget as HTMLImageElement; if(!img.src.includes('/fallback1.png')){ img.onerror=null; img.src='/fallback1.png'; }}} />
           <span>{name}</span>
         </div>
+
         {restaurantId !== 'other' && (
           <Link to={`/restaurant/${restaurantId}`} className="text-zinc-500" aria-label={`Go to ${name}`}>
-            <ChevronRightIcon className="size-5" />
+            <ChevronRightIcon className="size-6 ml-2" />
           </Link>
         )}
       </div>
@@ -112,17 +112,17 @@ export default function CartPage() {
     <>
       
       <Navbar/>
-    <div className="max-w-[800px] mx-auto px-4 py-10">
-      <h2 className="text-2xl font-semibold mb-6">My Cart</h2>
+    <div className="max-w-[800px]  sm:mx-auto mx-4 py-12 overflow-hidden">
+      <h2 className="text-[32px] font-extrabold mb-4 sm:mb-8">My Cart</h2>
 
       <div className="space-y-5">
         {groups.map((g) => {
           const groupTotal = g.items.reduce((a, b) => a + b.price * b.qty, 0);
           return (
-            <Card key={g.restaurantId} className="shadow-sm border border-neutral-200 rounded-2xl">
-              <CardContent className="p-4">
+            <Card key={g.restaurantId} className="rounded-2xl min-w-[360px] shadow-[0_0_20px_rgba(203,202,202,0.25)]">
+              <CardContent className="p-0">
                 <GroupHeader restaurantId={g.restaurantId} />
-                <div className="mt-3 space-y-3">
+                <div className="mt-5 space-y-3 sm:space-y-5">
                   {g.items.map((it) => (
                     pendingRemove[it.id] ? (
                       <div key={it.id} className="flex items-center gap-3">
@@ -134,37 +134,30 @@ export default function CartPage() {
                         <Skeleton className="h-8 w-24 rounded-full" />
                       </div>
                     ) : (
-                      <div key={it.id} className="flex items-center gap-3">
-                        <img src={it.imageUrl || '/fallback1.png'} alt={it.name} className="h-16 w-16 object-cover rounded-lg" onError={(e)=>{ const img=e.currentTarget as HTMLImageElement; if(!img.src.includes('/fallback1.png')){ img.onerror=null; img.src='/fallback1.png'; }}} />
+                      <div key={it.id} className="flex items-center gap-x-[17px] ">
+                        <img src={it.imageUrl || '/iconRectangle.png'} alt={it.name} className="h-20 w-20 object-cover rounded-lg " onError={(e)=>{ const img=e.currentTarget as HTMLImageElement; if(!img.src.includes('/iconRectangle.png')){ img.onerror=null; img.src='/fallback1.png'; }}} />
+
                         <div className="flex-1">
-                          <div className="text-sm text-zinc-700">{it.name}</div>
-                          <div className="text-[var(--color-brand,#D22B21)] font-semibold">{formatCurrency(it.price)}</div>
+                          <div className="text-sm sm:text-[16px] leading-[30px] text-gray-950">{it.name}</div>
+                          <div className="text-gray-950 font-extrabold text-lg leading-[32px]">{formatCurrency(it.price)}</div>
                         </div>
                         <QtyControl id={it.id} qty={it.qty} pending={pendingRemove[it.id]} />
-                        <button
-                          className="ml-2 size-8 rounded-full border border-neutral-300 grid place-items-center text-zinc-600"
-                          aria-label="Remove item"
-                          onClick={() => {
-                            // Per requirement: trash only removes locally; API deletion is triggered by minus at qty=1
-                            d(removeFromCart(it.id));
-                          }}
-                        >
-                          <Trash2Icon className="size-4" />
-                        </button>
+                        
                       </div>
                     )
                   ))}
                 </div>
 
                 <Separator className="my-4" />
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
                   <div className="text-sm">
-                    <div className="text-zinc-600">Total</div>
-                    <div className="font-bold">{formatCurrency(groupTotal)}</div>
+                    <div className="text-gray-950 text-sm sm:text-[16px] sm:leading-[30px]">Total</div>
+                    <div className="font-extrabold text-lg sm:text-xl leading-[32px] sm:leading-[34px] mb-3">{formatCurrency(groupTotal)}</div>
                   </div>
-                  <Button className="rounded-full px-6" onClick={() => syncAndGoCheckout(g.items)} disabled={syncing}>
+                  <Button className="rounded-full px-6 w-full sm:w-[240px] text-sm sm:text-[16px] h-11 sm:h-12" onClick={() => syncAndGoCheckout(g.items)} disabled={syncing}>
                     {syncing ? 'Updating…' : 'Checkout'}
                   </Button>
+                  
                 </div>
               </CardContent>
             </Card>
@@ -181,7 +174,7 @@ export default function CartPage() {
       </div>
 
       {/* Grand total summary if multiple restaurants */}
-      {items.length > 0 && groups.length > 1 && (
+      {/* {items.length > 0 && groups.length > 1 && (
         <div className="mt-6 ml-auto max-w-sm">
           <Card>
             <CardContent className="p-4">
@@ -195,7 +188,7 @@ export default function CartPage() {
             </CardContent>
           </Card>
         </div>
-      )}
+      )} */}
     </div>
     </>
   );

@@ -60,7 +60,7 @@ export default function RestaurantCard({
               </span>
             </div>
 
-            {/* <span className='text-zinc-400'>•</span> */}
+            {/* <span className='text-gray-400'>•</span> */}
             <span className='text-md font-normal text-gray-950 '>
               {restaurant.address ?? 'Jakarta Selatan'}{' '}
               {distText ? `· ${distText}` : ''}
