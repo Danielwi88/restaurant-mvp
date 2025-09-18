@@ -1,4 +1,3 @@
-// src/services/queries/auth.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiGet, apiPost, apiPut } from "../api/axios";
 import { showToast } from "@/lib/toast";

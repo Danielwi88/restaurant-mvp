@@ -77,8 +77,10 @@ export const useRestaurantMenuImages = (
               const img = toAbsolute(m.image ?? m.imageUrl ?? undefined);
               if (img) imageMap.set(key, img);
             }
-          } catch {
-            // Ignore individual restaurant failures; fallback will handle missing images.
+          } catch (e) {
+            if (import.meta.env.DEV) {
+              console.debug('[menu-images] failed loading images', restaurantId, e);
+            }
           }
         })
       );

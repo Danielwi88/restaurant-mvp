@@ -23,12 +23,12 @@ function normalizePrefix(input: string | undefined): string {
 const base = normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL);
 const prefix = normalizePrefix(import.meta.env.VITE_API_PREFIX ?? "/api");
 
-// Export the resolved origin/prefix for other modules (e.g., building asset URLs)
+
 export const API_ORIGIN = base;
 export const API_PREFIX = prefix;
 
 const axios = Axios.create({
-  // Compose base + optional prefix, e.g. https://host + /api or /api/v1
+  
   baseURL: `${base}${prefix}`,
 });
 

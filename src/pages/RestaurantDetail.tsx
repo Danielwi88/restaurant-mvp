@@ -357,7 +357,7 @@ export default function RestaurantDetail() {
                     src={restaurant?.logoUrl}
                     alt={restaurant?.name}
                   />
-                  {/* <AvatarFallback className="text-gray-950">{(restaurant?.name ?? "?").slice(0,2)}</AvatarFallback> */}
+                  
                 </Avatar>
                 
                 <div className='flex flex-col justify-between '>
@@ -453,13 +453,7 @@ export default function RestaurantDetail() {
                       <div className='flex items-center gap-3'>
                         <Avatar className='size-[58px] sm:size-16'>
                           <AvatarImage src={rv.user?.avatarUrl ?? rv.user?.avatar} />
-                          {/* <AvatarFallback className='text-gray-950'>
-                            {(rv.user?.name ?? '?')
-                              .split(' ')
-                              .map((s) => s[0])
-                              .join('')
-                              .slice(0, 2)}
-                          </AvatarFallback> */}
+                          
                         </Avatar>
                         <div>
                           <div className='font-extrabold text-gray-950 text-sm sm:text-[16px] pb-4'>

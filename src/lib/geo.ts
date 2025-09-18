@@ -1,6 +1,6 @@
 export type LatLong = { lat: number; long: number };
 
-// Haversine distance in kilometers
+
 export function distanceKm(a: LatLong, b: LatLong): number {
   const R = 6371; // km
   const dLat = deg2rad(b.lat - a.lat);
@@ -23,7 +23,7 @@ export function formatKm(km?: number): string | undefined {
 
 function deg2rad(d: number) { return d * (Math.PI / 180); }
 
-// Read a cached user location from localStorage (if set by the app)
+
 export function getCachedGeo(): LatLong | null {
   try {
     const raw = localStorage.getItem('user_geo');
@@ -32,6 +32,10 @@ export function getCachedGeo(): LatLong | null {
     if (p && typeof p.lat === 'number' && typeof p.long === 'number') {
       return { lat: p.lat, long: p.long } as LatLong;
     }
-  } catch {}
+  } catch (e) {
+    if (import.meta.env.DEV) {
+      console.debug('[geo] getCachedGeo parse failed', e);
+    }
+  }
   return null;
 }

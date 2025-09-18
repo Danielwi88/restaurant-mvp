@@ -47,7 +47,7 @@ export function useGeolocation(): GeoState {
           try { localStorage.setItem('user_geo', JSON.stringify(position)); } catch { void 0; }
         },
         (err) => {
-          // Retry once for transient errors like kCLErrorDomain/kCLErrorLocationUnknown
+          // Retry once for transient errors 
           const transient = (err.code === err.POSITION_UNAVAILABLE || err.code === err.TIMEOUT);
           if (!retry && transient) {
             setTimeout(() => { if (!aborted) getOnce(true); }, 1000);
@@ -59,10 +59,15 @@ export function useGeolocation(): GeoState {
       );
     };
 
-    // Ask permission status when available to avoid noisy OS errors
+    
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const navPerms = (navigator as any).permissions as { query?: (x:{name:string})=>Promise<{state:'granted'|'denied'|'prompt'}> } | undefined;
+      type PermissionState = 'granted' | 'denied' | 'prompt';
+      type PermissionsLike = { query?: (x: { name: 'geolocation' } | PermissionDescriptor) => Promise<{ state: PermissionState }> };
+      const navWithMaybePerms = navigator as Navigator & { permissions?: unknown };
+      const permsUnknown: unknown = navWithMaybePerms.permissions;
+      const navPerms = (permsUnknown && typeof permsUnknown === 'object')
+        ? (permsUnknown as PermissionsLike)
+        : undefined;
       if (navPerms?.query) {
         navPerms.query({ name: 'geolocation' }).then((p) => {
           if (p.state === 'denied') finish({ loading: false, error: 'Location permission denied' });

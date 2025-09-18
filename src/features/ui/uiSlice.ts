@@ -1,4 +1,3 @@
-// src/features/ui/uiSlice.ts
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 export type ModalState = {

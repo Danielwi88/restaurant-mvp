@@ -134,7 +134,7 @@ export const useRestaurants = (params?: { q?:string; page?:number; limit?:number
       const query = params?.q?.trim()?.toLowerCase();
       let out = data;
       if (query) {
-        // Apply client-side filter by name/address as a fallback if server didn’t filter
+        
         out = out.filter((r) =>
           (r.name?.toLowerCase().includes(query) || r.address?.toLowerCase().includes(query))
         );
@@ -216,7 +216,9 @@ export const useInfiniteRestaurants = (params?: { q?:string; limit?:number; rati
       if (params?.sort === 'rating_desc') {
         out = [...out].sort((a,b) => (b.rating ?? 0) - (a.rating ?? 0));
       }
+      // Enforce page size on the client to guarantee exactly `limit` items per page
       const hasMore = out.length >= limit;
-      return { items: out, hasMore } as { items: Restaurant[]; hasMore: boolean };
+      const pageItems = out.slice(0, limit);
+      return { items: pageItems, hasMore } as { items: Restaurant[]; hasMore: boolean };
     }
   });

@@ -1,4 +1,3 @@
-// src/features/filters/filtersSlice.ts
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 export type FiltersState = { q: string; category?: string; sort?: "rating_desc"|"price_asc"|"price_desc"|"newest"; minPrice?:number; maxPrice?:number; rating?:number; };
 const initialState: FiltersState = { q: "" };

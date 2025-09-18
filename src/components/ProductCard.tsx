@@ -60,7 +60,7 @@ export default function ProductCard({
         },
         {
           onSuccess: (res: AddCartResponse) => {
-            // Also reflect in local cart for immediate UX and badge count
+            // reflect in local cart for immediate UX and badge count
             const serverId = res?.data?.cartItem?.id;
             d(
               addToCart({
