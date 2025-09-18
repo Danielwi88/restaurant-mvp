@@ -66,7 +66,7 @@ export function DropdownMenuContent({
   return createPortal(
     <div
       className={cn(
-        "z-50 min-w-56 rounded-xl border bg-white p-2 shadow-xl",
+        "z-50 min-w-56 rounded-xl border bg-white p-2 shadow-2xl w-[197px]",
         "animate-in fade-in-0 zoom-in-95",
         className
       )}
@@ -91,7 +91,7 @@ export function DropdownMenuItem({ className, children, onSelect }: { className?
   return (
     <button
       className={cn(
-        "w-full select-none items-center rounded-lg px-3 py-2 text-left text-sm text-zinc-800",
+        "w-full select-none items-center rounded-lg px-3 py-2 text-left text-sm text-gray-800",
         "hover:bg-neutral-100",
         className
       )}

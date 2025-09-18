@@ -154,7 +154,7 @@ export default function CartPage() {
                     <div className="text-gray-950 text-sm sm:text-[16px] sm:leading-[30px]">Total</div>
                     <div className="font-extrabold text-lg sm:text-xl leading-[32px] sm:leading-[34px] mb-3">{formatCurrency(groupTotal)}</div>
                   </div>
-                  <Button className="rounded-full px-6 w-full sm:w-[240px] text-sm sm:text-[16px] h-11 sm:h-12" onClick={() => syncAndGoCheckout(g.items)} disabled={syncing}>
+                  <Button className="rounded-full px-6 w-full sm:w-[240px] text-sm sm:text-[16px] h-11 sm:h-12 cursor-pointer" onClick={() => syncAndGoCheckout(g.items)} disabled={syncing}>
                     {syncing ? 'Updating…' : 'Checkout'}
                   </Button>
                   

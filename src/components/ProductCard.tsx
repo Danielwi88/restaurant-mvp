@@ -106,11 +106,11 @@ export default function ProductCard({
     }
   };
   return (
-    <Card className='overflow-hidden !p-0 shadow-xs'>
+    <Card className='overflow-hidden gap-0 p-0 sm:p-0 rounded-2xl shadow-xs'>
       <img
         src={item.imageUrl || '/fallback1.png'}
         alt={item.name}
-        className='h-[285px] w-full object-cover rounded-t-2xl'
+        className='h-[220px] w-full object-cover'
         onError={(e) => {
           const img = e.currentTarget as HTMLImageElement;
           if (!img.src.includes('/fallback1.png')) {
@@ -119,37 +119,40 @@ export default function ProductCard({
           }
         }}
       />
-      <CardContent className='sm:flex justify-between px-4 pb-4'>
-        <div className='flex flex-col'> 
-
-        <div className='font-medium text-sm sm:text-[16px]'>{item.name}</div>
-        <div className='text-gray-950 text-lg sm:text-[16px] font-extrabold'>
-          {formatCurrency(item.price)}
-        </div>
-        </div>
-        {typeof distanceKm === 'number' && (
-          <div className='mt-0 text-xs text-zinc-600'>
-            {formatKm(distanceKm)}
+      <CardContent className='px-4 pb-4 pt-3 space-y-3'>
+        <div className='flex items-start justify-between gap-3'>
+          <div className='flex-1 min-w-0'>
+            <div className='text-sm sm:text-base font-medium text-gray-950 line-clamp-2'>
+              {item.name}
+            </div>
+            <div className='mt-1 text-lg font-extrabold text-gray-950'>
+              {formatCurrency(item.price)}
+            </div>
           </div>
-        )}
+          {typeof distanceKm === 'number' && (
+            <div className='shrink-0 text-xs text-zinc-600'>
+              {formatKm(distanceKm)}
+            </div>
+          )}
+        </div>
+
         {qty > 0 ? (
-          <div className='w-full mt-0 flex items-center gap-4'>
-            
+          <div className='flex items-center justify-center gap-4'>
             <button
-              className='ml-4 size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 text-2xl sm:text-3xl'
+              className='size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 text-lg sm:text-xl'
               aria-label='Decrease quantity'
               onClick={() => d(decrementQty({ id: item.id }))}
             >
               -
             </button>
             <div
-              className='w-4 text-center text-[16px] sm:text-lg font-medium'
+              className='w-8 text-center text-base sm:text-lg font-semibold'
               aria-live='polite'
             >
               {qty}
             </div>
             <button
-              className='size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center text-2xl sm:text-3xl'
+              className='size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center text-lg sm:text-xl'
               aria-label='Increase quantity'
               onClick={() => d(incrementQty({ id: item.id }))}
             >
@@ -157,16 +160,13 @@ export default function ProductCard({
             </button>
           </div>
         ) : (
-          <div className='flex justify-center items-center'>
-            
           <Button
-            className='w-full h-9 sm:h-10 max-w-[148px] mt-0 sm:w-[79px] rounded-full'
+            className='w-full h-9 sm:h-10 rounded-full'
             onClick={onAdd}
             disabled={!localOnly && addServer.isPending}
           >
             {!localOnly && addServer.isPending ? 'Adding…' : 'Add'}
           </Button>
-          </div>
         )}
       </CardContent>
     </Card>

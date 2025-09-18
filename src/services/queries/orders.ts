@@ -77,7 +77,8 @@ export const useOrders = (params?: { status?:string }) =>
         } as Order;
       });
       return mapped;
-    }
+    },
+    refetchOnMount: "always",
   });
 
 export const useCreateOrder = () =>
@@ -110,4 +111,3 @@ export const useRemoveCartItem = () =>
       showToast(msg, 'success');
     },
   });
-

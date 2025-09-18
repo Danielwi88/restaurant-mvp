@@ -389,12 +389,12 @@ export default function Orders() {
 
       {/* Give Review Modal */}
       <Dialog open={reviewOpen} onOpenChange={setReviewOpen}>
-        <DialogContent className=' sm:max-w-md rounded-2xl'>
+        <DialogContent className='w-full mx-auto sm:w-[439px] sm:max-w-md rounded-2xl'>
           <DialogHeader>
-            <DialogTitle>Give Review</DialogTitle>
+            <DialogTitle className='text-[20px] leading-[34px] sm:text-[24px] sm:leading-[36px] font-extrabold text-gray-950'>Give Review</DialogTitle>
           </DialogHeader>
-          <div className='text-sm text-gray-950'>Give Rating</div>
-          <div className='mt-1 flex items-center gap-1'>
+          <div className='text-[16px] font-extrabold leading-[30px] text-center text-gray-950'>Give Rating</div>
+          <div className='mt-1 flex items-center gap-1 justify-center'>
             {Array.from({ length: 5 }).map((_, i) => {
               const idx = i + 1;
               const active = rating >= idx;
@@ -405,9 +405,9 @@ export default function Orders() {
                   onClick={() => setRating(idx)}
                 >
                   <StarIcon
-                    className={`size-6 ${
+                    className={`size-10 sm:size-[49px] ${
                       active
-                        ? 'text-yellow-500 fill-yellow-500'
+                        ? 'text-[#fdb022] fill-[#fdb022]'
                         : 'text-zinc-300'
                     }`}
                   />
@@ -421,10 +421,10 @@ export default function Orders() {
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setComment(e.target.value)
             }
-            className='mt-3 min-h-28'
+            className='mt-2 sm:mt-3 min-h-[235px] text-gray-500 text-sm sm:text-[16px] leading-[30px] border border-gray-300 rounded-xl '
           />
           <Button
-            className='mt-4 rounded-full'
+            className='mt-2 rounded-full h-11 sm:h-12'
             disabled={createReview.isPending || !current?.tx || !current?.rid}
             onClick={() => {
               if (!current?.tx || !current?.rid) return;

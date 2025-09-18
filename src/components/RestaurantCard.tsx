@@ -24,7 +24,7 @@ export default function RestaurantCard({
 
   return (
     <Link to={`/restaurant/${restaurant.id}`}>
-      <Card className='overflow-hidden shadow-sm border border-neutral-200'>
+      <Card className='overflow-hidden shadow-sm border border-neutral-200 p-4'>
         <CardContent className='flex gap-3'>
           <div className='h-[90px] sm:h-30 max-w-[396px] bg-white flex items-center'>
             {restaurant.logoUrl ? (

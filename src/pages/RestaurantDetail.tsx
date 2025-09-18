@@ -126,7 +126,7 @@ export default function RestaurantDetail() {
   return (
     <>
       <Navbar />
-      <div className='max-w-6xl mx-auto px-4 py-6'>
+      <div className='max-w-[1200px] mx-auto px-4 sm:px-0 py-4 sm:py-6'>
         {isLoading && !data ? (
           <>
             {/* Hero skeleton */}
@@ -210,8 +210,8 @@ export default function RestaurantDetail() {
           <>
             {/* Hero section */}
             <div className='md:hidden'>
-              <Card className='rounded-3xl border-none shadow-sm'>
-                <CardContent className='p-4 space-y-4'>
+              <Card className='rounded-2xl border-none shadow-none bg-neutral-50 '>
+                <CardContent className='p-0 space-y-5'>
                   <div className='relative overflow-hidden rounded-3xl bg-neutral-100 aspect-[4/3]'>
                     {images.map((src, index) => (
                       <img
@@ -253,11 +253,11 @@ export default function RestaurantDetail() {
               </Card>
             </div>
 
-            <div className='hidden md:grid md:grid-cols-3 gap-4'>
+            <div className='hidden md:grid md:grid-cols-[minmax(0,651px)_1fr] gap-4 md:-mb-10'>
               <img
                 src={collage[0]}
                 alt={restaurant?.name}
-                className='md:col-span-2 h-64 md:h-80 lg:h-96 w-full object-cover rounded-2xl'
+                className='h-[260px] md:h-80 lg:h-[470px] w-full object-cover rounded-2xl'
                 onError={(e) => {
                   const img = e.currentTarget;
                   if (!img.src.endsWith(HERO_FALLBACKS[0])) {
@@ -270,7 +270,7 @@ export default function RestaurantDetail() {
                 <img
                   src={collage[1]}
                   alt='gallery-1'
-                  className='h-32 md:h-36 lg:h-44 w-full object-cover rounded-2xl'
+                  className='h-32 md:h-52 lg:h-[302px] w-full object-cover rounded-2xl'
                   onError={(e) => {
                     const img = e.currentTarget;
                     if (!img.src.endsWith(HERO_FALLBACKS[1])) {
@@ -283,7 +283,7 @@ export default function RestaurantDetail() {
                   <img
                     src={collage[2]}
                     alt='gallery-2'
-                    className='h-32 md:h-36 lg:h-44 w-full object-cover rounded-2xl'
+                    className='h-32 md:h-24 lg:h-[148px] w-full object-cover rounded-2xl'
                     onError={(e) => {
                       const img = e.currentTarget;
                       if (!img.src.endsWith(HERO_FALLBACKS[2])) {
@@ -295,7 +295,7 @@ export default function RestaurantDetail() {
                   <img
                     src={collage[3]}
                     alt='gallery-3'
-                    className='h-32 md:h-36 lg:h-44 w-full object-cover rounded-2xl'
+                    className='h-32 md:h-24 lg:h-[148px] w-full object-cover rounded-2xl'
                     onError={(e) => {
                       const img = e.currentTarget;
                       if (!img.src.endsWith(HERO_FALLBACKS[3])) {
@@ -458,7 +458,7 @@ export default function RestaurantDetail() {
                         <div className='font-medium'>
                           {rv.user?.name ?? 'Anonymous'}
                         </div>
-                        <div className='text-xs text-zinc-500'>
+                        <div className='text-xs text-gray-500'>
                           {rv.createdAt
                             ? new Date(rv.createdAt).toLocaleString('en-GB', {
                                 day: '2-digit',

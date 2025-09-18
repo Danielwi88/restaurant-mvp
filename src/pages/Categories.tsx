@@ -15,7 +15,7 @@ export default function Categories() {
   const f = useAppSelector((s: RootState) => s.filters);
   const d = useAppDispatch();
 
-  // Local controlled inputs for price to avoid dispatching on each keystroke
+ 
   const [min, setMin] = useState<string>(f.minPrice?.toString() ?? '');
   const [max, setMax] = useState<string>(f.maxPrice?.toString() ?? '');
 
@@ -71,7 +71,7 @@ export default function Categories() {
     <>
       <Navbar />
       <section className='max-w-6xl mx-auto px-4 py-10'>
-        <h1 className='text-2xl font-semibold tracking-[-0.01em]'>
+        <h1 className='text-3xl sm:text[32px] sm:leading-[42px] font-extrabold tracking-[-0.01em]'>
           All Restaurant
         </h1>
 
@@ -79,31 +79,31 @@ export default function Categories() {
           {/* Sidebar Filters */}
           <aside className='col-span-12 md:col-span-3'>
             <div className='bg-white rounded-xl border border-neutral-200 shadow-sm p-4 md:sticky md:top-28'>
-              <div className='text-xs font-semibold tracking-wider text-zinc-500 uppercase'>
+              <div className='text-sm sm:text-[16px] font-extrabold tracking-wider text-gray-950 uppercase'>
                 FILTER
               </div>
 
               <div className='mt-4'>
-                <div className='text-sm font-medium text-gray-950 mb-2'>
+                <div className='text-16px sm:text-lg font-extrabold text-gray-950 mb-2'>
                   Distance
                 </div>
                 {/* Visual only for now */}
                 <div className='space-y-2 text-sm text-gray-950'>
                   {['Nearby', 'Within 1 km', 'Within 3 km', 'Within 5 km'].map(
                     (label, i) => (
-                      <label key={label} className='flex items-center gap-2'>
+                      <label
+                        key={label}
+                        className='flex cursor-pointer items-center gap-3 rounded-sm'
+                      >
                         <input
                           type='radio'
                           name='distance'
-                          className='accent-[var(--color-brand,#D22B21)]'
-                          disabled={i !== 0}
+                          value={label}
+                          className='peer sr-only'
                           defaultChecked={i === 0}
                         />
-                        <span
-                          className={
-                            i !== 0 ? 'text-gray-400' : 'text-gray-950'
-                          }
-                        >
+                        <span className='relative inline-flex size-5 shrink-0 items-center justify-center rounded-sm border border-neutral-300 bg-white transition peer-checked:border-transparent peer-checked:bg-[var(--color-brand,#D22B21)] peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-[var(--color-brand,#D22B21)] peer-disabled:border-neutral-200 peer-disabled:bg-neutral-100 before:content-[""] before:absolute before:w-[12px] before:h-[8px] before:border-b-2 before:border-l-2 before:border-white before:-rotate-45 before:opacity-0 before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:pointer-events-none peer-checked:before:opacity-100'></span>
+                        <span className='text-gray-950'>
                           {label}
                         </span>
                       </label>
@@ -112,7 +112,7 @@ export default function Categories() {
                 </div>
               </div>
 
-              <div className='mt-6'>
+              <div className='mt-6 border-t border-gray-300 pt-6'>
                 <div className='text-sm font-medium text-gray-950 mb-2'>
                   Price
                 </div>
@@ -154,37 +154,44 @@ export default function Categories() {
                 </div>
               </div>
 
-              <div className='mt-6'>
+              <div className='mt-6 border-t border-gray-300 pt-6'>
                 <div className='text-sm font-medium text-gray-950 mb-2'>
                   Rating
                 </div>
-                <div className='space-y-2 text-sm'>
+                <div className='space-y-2 text-sm text-gray-950'>
                   {[5, 4, 3, 2, 1].map((r) => (
-                    <label key={r} className='flex items-center gap-2'>
+                    <label
+                      key={r}
+                      className='flex cursor-pointer items-center gap-3 rounded-sm'
+                    >
                       <input
                         type='radio'
                         name='rating'
-                        className='accent-[var(--color-brand,#D22B21)]'
+                        className='peer sr-only'
                         checked={f.rating === r}
                         onChange={() => d(setRating(r))}
                       />
-                      <span className='text-gray-950'>
-                        {Array.from({ length: r })
-                          .map(() => '⭐')
-                          .join(' ')}{' '}
-                        & up
+                      <span className='relative inline-flex size-5 shrink-0 items-center justify-center rounded-sm border border-neutral-300 bg-white transition peer-checked:border-transparent peer-checked:bg-[var(--color-brand,#D22B21)] peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-[var(--color-brand,#D22B21)] before:content-[""] before:absolute before:w-[12px] before:h-[8px] before:border-b-2 before:border-l-2 before:border-white before:-rotate-45 before:opacity-0 before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:pointer-events-none peer-checked:before:opacity-100'></span>
+                      <span className='flex items-center gap-2'>
+                        <img
+                          src='/star.svg'
+                          alt='Star'
+                          className='h-4 w-4'
+                        />
+                        {r}
                       </span>
                     </label>
                   ))}
-                  <label className='flex items-center gap-2'>
+                  <label className='flex cursor-pointer items-center gap-3 rounded-sm'>
                     <input
                       type='radio'
                       name='rating'
-                      className='accent-[var(--color-brand,#D22B21)]'
+                      className='peer sr-only'
                       checked={f.rating === undefined}
                       onChange={() => d(setRating(undefined))}
                     />
-                    <span className='text-gray-950'>Any rating</span>
+                    <span className='relative inline-flex size-5 shrink-0 items-center justify-center rounded-sm border border-neutral-300 bg-white transition peer-checked:border-transparent peer-checked:bg-[var(--color-brand,#D22B21)] peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-[var(--color-brand,#D22B21)] before:content-[""] before:absolute before:w-[12px] before:h-[8px] before:border-b-2 before:border-l-2 before:border-white before:-rotate-45 before:opacity-0 before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:pointer-events-none peer-checked:before:opacity-100'></span>
+                    <span>Any rating</span>
                   </label>
                 </div>
               </div>

@@ -308,7 +308,7 @@ export default function Checkout() {
                     <div className='ml-0 mt-5'>
                       <Button
                         variant={editing ? 'default' : 'outline'}
-                        className='w-[120px] bg-white border-gray-300 h-10 text-sm sm:text-[16px] font-bold rounded-full'
+                        className='w-[120px] bg-white text-gray-950 cursor-pointer hover:scale-105 hover:text-white border border-gray-300 h-10 text-sm sm:text-[16px] font-bold rounded-full'
                         onClick={() => setEditing((e) => !e)}
                       >
                         {editing ? 'Save' : 'Change'}
@@ -536,7 +536,7 @@ export default function Checkout() {
                   <span>{formatCurrency(grandTotal)}</span>
                 </div>
                 <Button
-                  className='w-full text-[16px] font-bold rounded-full h-11 sm:h-12'
+                  className='w-full text-[16px] hover:scale-105 font-bold rounded-full h-11 sm:h-12 cursor-pointer hover:shadow-md hover:-translate-y-0.5'
                   onClick={() => setConfirmOpen(true)}
                   disabled={!items.length || isPlacing}
                 >
