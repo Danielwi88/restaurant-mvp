@@ -110,7 +110,7 @@ export default function Navbar() {
       } catch {
         void 0;
       }
-      showToast('Updating orders');
+      showToast('Updating orders...');
       const ops = items.map(async (it) => {
         if (it.serverCartItemId) {
           
@@ -203,7 +203,7 @@ export default function Navbar() {
           <button
             aria-label='Open cart'
             onClick={openCart}
-            className={`relative w-8 h-8 grid place-items-center ${
+            className={`relative w-8 h-8 grid place-items-center cursor-pointer ${
               !scrolled && isHome ? 'text-white' : 'text-zinc-900'
             }`}
           >

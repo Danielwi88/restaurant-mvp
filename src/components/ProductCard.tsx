@@ -110,7 +110,7 @@ export default function ProductCard({
       <img
         src={item.imageUrl || '/fallback1.png'}
         alt={item.name}
-        className='h-[220px] w-full object-cover'
+        className='h-[172.5px] sm:h-[285px] w-full object-cover'
         onError={(e) => {
           const img = e.currentTarget as HTMLImageElement;
           if (!img.src.includes('/fallback1.png')) {
@@ -139,7 +139,7 @@ export default function ProductCard({
         {qty > 0 ? (
           <div className='flex items-center justify-center gap-4'>
             <button
-              className='size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 text-lg sm:text-xl'
+              className='size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 text-lg sm:text-xl cursor-pointer'
               aria-label='Decrease quantity'
               onClick={() => d(decrementQty({ id: item.id }))}
             >
@@ -152,7 +152,7 @@ export default function ProductCard({
               {qty}
             </div>
             <button
-              className='size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center text-lg sm:text-xl'
+              className='size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center text-lg sm:text-xl cursor-pointer'
               aria-label='Increase quantity'
               onClick={() => d(incrementQty({ id: item.id }))}
             >
@@ -161,7 +161,7 @@ export default function ProductCard({
           </div>
         ) : (
           <Button
-            className='w-full h-9 sm:h-10 rounded-full'
+            className='w-full h-9 sm:h-10 rounded-full cursor-pointer'
             onClick={onAdd}
             disabled={!localOnly && addServer.isPending}
           >

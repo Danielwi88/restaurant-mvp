@@ -1,6 +1,6 @@
 import Navbar from '@/components/Navbar';
 import ProductCard from '@/components/ProductCard';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8,7 +8,7 @@ import { useAppDispatch } from '@/features/store';
 import { openModal } from '@/features/ui/uiSlice';
 import { distanceKm, formatKm, getCachedGeo } from '@/lib/geo';
 import { useRestaurant } from '@/services/queries/restaurants';
-import { Share2Icon, StarIcon } from 'lucide-react';
+import { Share2Icon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -253,7 +253,7 @@ export default function RestaurantDetail() {
               </Card>
             </div>
 
-            <div className='hidden md:grid md:grid-cols-[minmax(0,651px)_1fr] gap-4 md:-mb-10'>
+            <div className='hidden md:grid md:grid-cols-[minmax(0,651px)_1fr] gap-4 md:-mb-30'>
               <img
                 src={collage[0]}
                 alt={restaurant?.name}
@@ -310,7 +310,7 @@ export default function RestaurantDetail() {
 
             {/* Resto header */}
             <div className='md:hidden mt-4'>
-              <Card className='rounded-3xl border-none shadow-sm'>
+              <Card className='rounded-3xl border-none shadow-none bg-neutral-50'>
                 <CardContent className='p-4'>
                   <div className='flex items-start justify-between gap-4'>
                     <div className='flex items-center gap-3'>
@@ -359,7 +359,8 @@ export default function RestaurantDetail() {
                   />
                   {/* <AvatarFallback className="text-gray-950">{(restaurant?.name ?? "?").slice(0,2)}</AvatarFallback> */}
                 </Avatar>
-                <div>
+                
+                <div className='flex flex-col justify-between '>
                   <div className='text-2xl font-semibold'>
                     {restaurant?.name}
                   </div>
@@ -387,18 +388,18 @@ export default function RestaurantDetail() {
               </div>
             </div>
 
-            <hr className='my-6' />
+            <hr className='mt-2 sm:mt-8 mb-6 sm:mb-8' />
 
             {/* Menu Section */}
             <div className='flex items-center justify-between'>
-              <h2 className='text-xl font-semibold'>Menu</h2>
+              <h2 className='text-2xl sm:text-[36px] font-extrabold'>Menu</h2>
             </div>
-            <div className='mt-4 flex gap-2'>
+            <div className='mt-6 flex gap-2'>
               {(['ALL', 'FOOD', 'DRINK'] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setActiveTab(t)}
-                  className={`px-3 py-1.5 rounded-full border text-sm ${
+                  className={`px-3 py-2 rounded-full border text-sm sm:text-[16px] font-bold ${
                     activeTab === t
                       ? 'bg-[#ffecec] text-brand border-brand'
                       : 'bg-white text-gray-950 border-neutral-300'
@@ -411,7 +412,7 @@ export default function RestaurantDetail() {
               ))}
             </div>
 
-            <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mt-6'>
+            <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-6 mt-6'>
               {filteredMenu.map((m) => (
                 <ProductCard key={m.id} item={m} localOnly />
               ))}
@@ -422,7 +423,7 @@ export default function RestaurantDetail() {
                 Show More
               </Button>
               {isFetching && (
-                <div className='mt-2 text-sm text-zinc-600'>
+                <div className='mt-2 text-sm text-gray-600'>
                   Updating
                   <LoadingDots />
                 </div>
@@ -433,60 +434,67 @@ export default function RestaurantDetail() {
 
             {/* Review Section */}
             <div className='flex items-center gap-2'>
-              <h2 className='text-xl font-semibold'>Review</h2>
-              <div className='flex items-center gap-1 text-sm text-gray-950'>
-                <StarIcon className='size-4 text-yellow-500' />
-                <span>{restaurant?.rating ?? 4.9}</span>
+              <h2 className='text-2xl sm:text-[36px] font-extrabold'>Review</h2>
+              <div className='flex items-center gap-2 text-sm sm:text-base text-gray-950'>
+                <img src='/star.svg' alt='rating' className='h-6 w-6' />
+                <span className='font-semibold'>{restaurant?.rating ?? 4.9}</span>
+                <span className='text-zinc-600'>({reviews.length} Ulasan)</span>
               </div>
             </div>
-            <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4'>
-              {reviews.map((rv) => (
-                <Card key={String(rv.id)} className='shadow-sm'>
-                  <CardContent className='p-4'>
-                    <div className='flex items-center gap-3'>
-                      <Avatar className='size-10'>
-                        {/* No avatar url provided by API, show initials */}
-                        <AvatarFallback className='text-gray-950'>
-                          {(rv.user?.name ?? '?')
-                            .split(' ')
-                            .map((s) => s[0])
-                            .join('')
-                            .slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className='font-medium'>
-                          {rv.user?.name ?? 'Anonymous'}
-                        </div>
-                        <div className='text-xs text-gray-500'>
-                          {rv.createdAt
-                            ? new Date(rv.createdAt).toLocaleString('en-GB', {
-                                day: '2-digit',
-                                month: 'long',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
-                            : ''}
+            <div className='grid md:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-5 mt-4 sm:mt-6'>
+              {reviews.map((rv) => {
+                const filled = Math.round(rv.star ?? rv.rating ?? 0);
+                return (
+                  <Card
+                    key={String(rv.id)}
+                    className='rounded-2xl border border-none shadow-md bg-white'
+                  >
+                    <CardContent className='p-0'>
+                      <div className='flex items-center gap-3'>
+                        <Avatar className='size-[58px] sm:size-16'>
+                          <AvatarImage src={rv.user?.avatarUrl ?? rv.user?.avatar} />
+                          {/* <AvatarFallback className='text-gray-950'>
+                            {(rv.user?.name ?? '?')
+                              .split(' ')
+                              .map((s) => s[0])
+                              .join('')
+                              .slice(0, 2)}
+                          </AvatarFallback> */}
+                        </Avatar>
+                        <div>
+                          <div className='font-extrabold text-gray-950 text-sm sm:text-[16px] pb-4'>
+                            {rv.user?.name ?? 'Anonymous'}
+                          </div>
+                          <div className='text-sm sm:text-[16px] text-gray-950'>
+                            {rv.createdAt
+                              ? new Date(rv.createdAt).toLocaleString('en-GB', {
+                                  day: '2-digit',
+                                  month: 'long',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })
+                              : ''}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className='mt-2 flex gap-1 text-yellow-500'>
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <StarIcon
-                          key={i}
-                          className={`size-4 ${
-                            i < Math.round(rv.star ?? rv.rating ?? 0)
-                              ? 'fill-yellow-500'
-                              : ''
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <p className='mt-2 text-sm text-gray-950'>{rv.comment}</p>
-                  </CardContent>
-                </Card>
-              ))}
+                      <div className='mt-2 sm:mt-3 mb-2 sm:mb-3 flex gap-1'>
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <img
+                            key={i}
+                            src='/star.svg'
+                            alt='star'
+                            className={`h-6 w-6 ${i < filled ? '' : 'opacity-30'}`}
+                          />
+                        ))}
+                      </div>
+                      <p className='mt-0 text-sm sm:text-[16px] text-gray-950 leading-6'>
+                        {rv.comment}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
             <div className='text-center mt-6'>
               <Button variant='outline' className='rounded-full'>

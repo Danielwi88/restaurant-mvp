@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { clearCart, updateQty } from '@/features/cart/cartSlice';
+import { clearCart, updateQty, decrementQty } from '@/features/cart/cartSlice';
 import type { RootState } from '@/features/store';
 import { useAppDispatch, useAppSelector } from '@/features/store';
 import { formatCurrency } from '@/lib/format';
@@ -308,7 +308,7 @@ export default function Checkout() {
                     <div className='ml-0 mt-5'>
                       <Button
                         variant={editing ? 'default' : 'outline'}
-                        className='w-[120px] bg-white text-gray-950 cursor-pointer hover:scale-105 hover:text-white border border-gray-300 h-10 text-sm sm:text-[16px] font-bold rounded-full'
+                        className='w-[120px] bg-white text-gray-950 cursor-pointer hover:scale-105 border border-gray-300 h-10 text-sm sm:text-[16px] font-bold rounded-full'
                         onClick={() => setEditing((e) => !e)}
                       >
                         {editing ? 'Save' : 'Change'}
@@ -401,11 +401,10 @@ export default function Checkout() {
                                 </div>
                                 <div className='flex items-center gap-2'>
                                   <button
-                                    className='size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 disabled:opacity-60'
+                                className='size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 disabled:opacity-60  cursor-pointer'
                                     aria-label='Decrease'
                                     onClick={() => {
-                                      const next = Math.max(1, i.qty - 1);
-                                      d(updateQty({ id: i.id, qty: next }));
+                                      d(decrementQty({ id: i.id }));
                                     }}
                                     disabled={pendingRemove[i.id]}
                                   >
@@ -415,7 +414,7 @@ export default function Checkout() {
                                     {i.qty}
                                   </div>
                                   <button
-                                    className='size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center disabled:opacity-60'
+                                    className='size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center disabled:opacity-60 cursor-pointer'
                                     aria-label='Increase'
                                     onClick={() => {
                                       const next = i.qty + 1;
@@ -423,7 +422,7 @@ export default function Checkout() {
                                     }}
                                     disabled={pendingRemove[i.id]}
                                   >
-                                    <PlusIcon className='size-5 sm:size-6' />
+                                    <PlusIcon className='size-5 sm:size-6 ' />
                                   </button>
                                 </div>
                               </div>

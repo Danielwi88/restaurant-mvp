@@ -76,6 +76,18 @@ export default function Auth() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Disable vertical scroll while on the Auth page
+  useEffect(() => {
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevBodyOverflow;
+      document.documentElement.style.overflow = prevHtmlOverflow;
+    };
+  }, []);
+
   useEffect(() => {
     const mode = sp.get('mode');
     if (mode === 'up') setTab('up');
@@ -152,13 +164,17 @@ export default function Auth() {
   );
 
   return (
-    <div className='grid md:grid-cols-2 gap-5 h-screen min-h-screen'>
+    <div className='grid md:grid-cols-2 gap-5 h-[100dvh] overflow-hidden'>
       <img
         src='/burger-login.png'
         alt='burger-login'
-        className='hidden md:block min-h-screen w-full object-cover'
+        className='hidden md:block h-[100dvh] w-full object-cover'
       />
-      <div className='flex items-center -mt-[64px] justify-center p-6'>
+      <div
+        className={`flex justify-center p-6 ${
+          tab === 'up' ? 'md:mt-[151px]' : 'md:mt-[272px]'
+        }`}
+      >
         <Card className='max-w-md border-none shadow-none w-full'>
           <CardContent className='p-6'>
             <div className='flex gap-[15px] mb-4 sm:mb-5'>

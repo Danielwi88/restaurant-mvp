@@ -7,12 +7,12 @@ import { decrementQty, incrementQty, setServerCartItemId } from "@/features/cart
 import type { RootState } from "@/features/store";
 import { useAppDispatch, useAppSelector } from "@/features/store";
 import { formatCurrency } from "@/lib/format";
-import { showToast } from "@/lib/toast";
+import { showToast, showHomeToast } from "@/lib/toast";
 import { apiPost, apiPut } from "@/services/api/axios";
 import { useRestaurant } from "@/services/queries/restaurants";
 import type { CartItem } from "@/types";
 import { ChevronRightIcon, MinusIcon, PlusIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function CartPage() {
@@ -21,6 +21,15 @@ export default function CartPage() {
   const [pendingRemove] = useState<Record<string, boolean>>({});
   const [syncing, setSyncing] = useState(false);
   const nav = useNavigate();
+  const emptyToastShown = useRef(false);
+
+  // Show a top-left toast with Home button when cart is empty
+  useEffect(() => {
+    if (items.length === 0 && !emptyToastShown.current) {
+      emptyToastShown.current = true;
+      showHomeToast('Cart is empty. Click the Foody icon to go home.');
+    }
+  }, [items.length]);
 
  
   const groups = useMemo(() => {
@@ -39,7 +48,7 @@ export default function CartPage() {
   const QtyControl = ({ id, qty, pending }: { id: string; qty: number; pending?: boolean }) => (
     <div className="flex items-center gap-2">
       <button
-        className="size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 disabled:opacity-60"
+        className="size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 disabled:opacity-60 cursor-pointer"
         aria-label="Decrease quantity"
         disabled={pending}
         onClick={() => { d(decrementQty({ id })); }}
@@ -48,12 +57,12 @@ export default function CartPage() {
       </button>
       <div className="px-4 text-center text-[16px] sm:text-lg font-semibold">{qty}</div>
       <button
-        className="size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center disabled:opacity-60"
+        className="size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center disabled:opacity-60 cursor-pointer"
         aria-label="Increase quantity"
         disabled={pending}
         onClick={() => { d(incrementQty({ id })); }}
       >
-        <PlusIcon className="size-5 sm:size-6" />
+        <PlusIcon className="size-5 sm:size-6 " />
       </button>
     </div>
   );

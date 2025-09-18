@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export default function Footer() {
   return (
     <footer className="mt-16 bg-[#0E1116] text-white/90">
@@ -61,12 +63,12 @@ export default function Footer() {
         <div className="sm:w-[200px] max-w-[200px] text-neutral-25 leading-[28px] space-y-4 ">
           <div className="text-sm sm:text-[16px] leading-[30px] font-extrabold mb-4 sm:mb-5">Explore</div>
           <ul className="space-y-4 text-sm text-neutral-25 leading-[28px]">
-            <li>All Food</li>
-            <li>Nearby</li>
-            <li>Discount</li>
-            <li>Best Seller</li>
-            <li>Delivery</li>
-            <li>Lunch</li>
+            <li><Link to="/categories">All Food</Link></li>
+            <li><Link to="/categories">Nearby</Link></li>
+            <li><Link to="/">Discount</Link></li>
+            <li><Link to="/">Best Seller</Link></li>
+            <li><Link to="/">Delivery</Link></li>
+            <li><Link to="/">Lunch</Link></li>
           </ul>
           
           
@@ -76,11 +78,11 @@ export default function Footer() {
 
         <div className="sm:w-[200px] max-w-[200px] text-sm sm:text-[16px] leading-[30px] font-extrabold mb-4 sm:mb-5">Help</div>
           <ul className="space-y-4 text-sm text-neutral-25 leading-[28px]">
-            <li>How to Order</li>
-            <li>Payment Methods</li>
-            <li>Track My Order</li>
-            <li>FAQ</li>
-            <li>Contact Us</li>
+            <li><Link to="/">How to Order</Link></li>
+            <li><Link to="/">Payment Methods</Link></li>
+            <li><Link to="/orders">Track My Order</Link></li>
+            <li><Link to="/">FAQ</Link></li>
+            <li><Link to="/">Contact Us</Link></li>
           </ul>
           <div className="flex justify-start self-end text-xs text-white/40 mt-10">© Danielwi_wph_010</div>
         
@@ -93,11 +95,11 @@ export default function Footer() {
 
 <div className="sm:w-[200px] max-w-[200px] text-sm sm:text-[16px] leading-[30px] font-extrabold mb-4 sm:mb-5">Help</div>
           <ul className="space-y-4 text-sm text-neutral-25 leading-[28px] ">
-            <li>How to Order</li>
-            <li>Payment Methods</li>
-            <li>Track My Order</li>
-            <li>FAQ</li>
-            <li>Contact Us</li>
+            <li><Link to="/">How to Order</Link></li>
+            <li><Link to="/">Payment Methods</Link></li>
+            <li><Link to="/orders">Track My Order</Link></li>
+            <li><Link to="/">FAQ</Link></li>
+            <li><Link to="/">Contact Us</Link></li>
           </ul>
           <div className="flex justify-start self-end text-xs text-white/40 mt-10">© Danielwi_wph_010</div>
 
@@ -108,4 +110,3 @@ export default function Footer() {
     </footer>
   )
 }
-
