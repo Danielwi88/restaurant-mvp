@@ -3,12 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { decrementQty, incrementQty, setServerCartItemId } from "@/features/cart/cartSlice";
+import { decrementQty, incrementQty } from "@/features/cart/cartSlice";
 import type { RootState } from "@/features/store";
 import { useAppDispatch, useAppSelector } from "@/features/store";
 import { formatCurrency } from "@/lib/format";
-import { showToast, showHomeToast } from "@/lib/toast";
-import { apiPost, apiPut } from "@/services/api/axios";
+import { showHomeToast } from "@/lib/toast";
 import { useRestaurant } from "@/services/queries/restaurants";
 import type { CartItem } from "@/types";
 import { ChevronRightIcon, MinusIcon, PlusIcon } from "lucide-react";
@@ -19,7 +18,7 @@ export default function CartPage() {
   const d = useAppDispatch();
   const items = useAppSelector((s: RootState) => s.cart.items);
   const [pendingRemove] = useState<Record<string, boolean>>({});
-  const [syncing, setSyncing] = useState(false);
+  // No syncing state needed since checkout is Redux-only now
   const nav = useNavigate();
   const emptyToastShown = useRef(false);
 
@@ -43,8 +42,7 @@ export default function CartPage() {
     return Array.from(m.entries()).map(([restaurantId, items]) => ({ restaurantId, items }));
   }, [items]);
 
-  // const grandTotal = items.reduce((a, b) => a + b.price * b.qty, 0);
-
+ 
   const QtyControl = ({ id, qty, pending }: { id: string; qty: number; pending?: boolean }) => (
     <div className="flex items-center gap-2">
       <button
@@ -67,33 +65,9 @@ export default function CartPage() {
     </div>
   );
 
-  const syncAndGoCheckout = async (groupItems: CartItem[]) => {
-    const tokenNow = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    if (!tokenNow) { nav('/checkout'); return; }
-    setSyncing(true);
-    try {
-      const ops = groupItems.map(async (it) => {
-        if (it.serverCartItemId) {
-          await apiPut(`cart/${it.serverCartItemId}`, { quantity: it.qty });
-        } else if (it.restaurantId) {
-          const rnum = Number(it.restaurantId); const mnum = Number(it.id);
-          const res = await apiPost<{ data?: { cartItem?: { id?: number | string } } }>('cart', {
-            restaurantId: Number.isFinite(rnum) ? rnum : it.restaurantId,
-            menuId: Number.isFinite(mnum) ? mnum : it.id,
-            quantity: it.qty,
-          });
-          const sid = res?.data?.cartItem?.id;
-          if (sid) d(setServerCartItemId({ id: it.id, serverCartItemId: String(sid) }));
-        }
-      });
-      await Promise.allSettled(ops);
-      nav('/checkout');
-    } catch (e) {
-      if (import.meta.env.DEV) console.error('[cart] sync before checkout failed', e);
-      showToast('Failed to sync cart. Please retry.', 'error');
-    } finally {
-      setSyncing(false);
-    }
+  const syncAndGoCheckout = async () => {
+    // No backend sync required; rely on Redux state only
+    nav('/checkout');
   };
 
   const GroupHeader = ({ restaurantId }: { restaurantId: string }) => {
@@ -163,8 +137,8 @@ export default function CartPage() {
                     <div className="text-gray-950 text-sm sm:text-[16px] sm:leading-[30px]">Total</div>
                     <div className="font-extrabold text-lg sm:text-xl leading-[32px] sm:leading-[34px] mb-3">{formatCurrency(groupTotal)}</div>
                   </div>
-                  <Button className="rounded-full px-6 w-full sm:w-[240px] text-sm sm:text-[16px] h-11 sm:h-12 cursor-pointer" onClick={() => syncAndGoCheckout(g.items)} disabled={syncing}>
-                    {syncing ? 'Updating…' : 'Checkout'}
+                  <Button className="rounded-full px-6 w-full sm:w-[240px] text-sm sm:text-[16px] h-11 sm:h-12 cursor-pointer" onClick={() => syncAndGoCheckout()}>
+                    Checkout
                   </Button>
                   
                 </div>
@@ -182,22 +156,7 @@ export default function CartPage() {
         )}
       </div>
 
-      {/* Grand total summary if multiple restaurants */}
-      {/* {items.length > 0 && groups.length > 1 && (
-        <div className="mt-6 ml-auto max-w-sm">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex justify-between mb-1 text-sm text-zinc-600">
-                <span>Subtotal</span><span>{formatCurrency(grandTotal)}</span>
-              </div>
-              <Separator className="my-3" />
-              <div className="flex justify-between font-bold">
-                <span>Total</span><span>{formatCurrency(grandTotal)}</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )} */}
+      
     </div>
     </>
   );

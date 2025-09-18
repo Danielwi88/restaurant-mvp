@@ -27,6 +27,20 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    build: {
+      chunkSizeWarningLimit: 900,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+            'redux-vendor': ['@reduxjs/toolkit', 'react-redux'],
+            'query-vendor': ['@tanstack/react-query'],
+            'ui-vendor': ['lucide-react', 'sonner'],
+            'axios-vendor': ['axios'],
+          },
+        },
+      },
+    },
   }
 })
 // https://vite.dev/config/

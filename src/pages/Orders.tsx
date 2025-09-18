@@ -272,7 +272,7 @@ export default function Orders() {
                   <button
                     key={t.id}
                     onClick={() => setStatus(t.id)}
-                    className={`px-4 py-2 rounded-full border  text-sm sm:text-[16px] ${
+                    className={`px-4 py-2 rounded-full border cursor-pointer text-sm sm:text-[16px] ${
                       status === t.id
                         ? ' text-brand border-brand bg-[#FFECEC]'
                         : 'bg-white text-neutral-950 border-gray-300'
@@ -355,7 +355,7 @@ export default function Orders() {
                               </div>
                             </div>
                             <Button
-                              className='rounded-full px-5 h-[48px] w-[240px]'
+                              className='rounded-full px-5 h-[48px] w-[240px] cursor-pointer'
                               onClick={() => {
                                 setCurrent({
                                   tx: order.transactionId,
@@ -421,10 +421,10 @@ export default function Orders() {
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setComment(e.target.value)
             }
-            className='mt-2 sm:mt-3 min-h-[235px] text-gray-500 text-sm sm:text-[16px] leading-[30px] border border-gray-300 rounded-xl '
+            className='mt-2 sm:mt-3 min-h-[235px] text-gray-950 text-sm sm:text-[16px] leading-[30px] border border-gray-300 rounded-xl '
           />
           <Button
-            className='mt-2 rounded-full h-11 sm:h-12'
+            className='mt-2 rounded-full h-11 sm:h-12 text-sm sm:text-[16px] cursor-pointer'
             disabled={createReview.isPending || !current?.tx || !current?.rid}
             onClick={() => {
               if (!current?.tx || !current?.rid) return;

@@ -1,14 +1,16 @@
-// src/app/routes.tsx
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Home from "@/pages/Home";
-import Auth from "@/pages/Auth";
-import RestaurantDetail from "@/pages/RestaurantDetail";
-import CartPage from "@/pages/Cart";
-import Checkout from "@/pages/Checkout";
-import Success from "@/pages/Success";
-import Orders from "@/pages/Orders";
-import Categories from "@/pages/Categories";
-import Profile from "@/pages/Profile";
+import { Suspense, lazy } from "react";
+
+
+const Home = lazy(() => import("@/pages/Home"));
+const Auth = lazy(() => import("@/pages/Auth"));
+const RestaurantDetail = lazy(() => import("@/pages/RestaurantDetail"));
+const CartPage = lazy(() => import("@/pages/Cart"));
+const Checkout = lazy(() => import("@/pages/Checkout"));
+const Success = lazy(() => import("@/pages/Success"));
+const Orders = lazy(() => import("@/pages/Orders"));
+const Categories = lazy(() => import("@/pages/Categories"));
+const Profile = lazy(() => import("@/pages/Profile"));
 
 const router = createBrowserRouter([
   { path: "/", element: <Home/> },
@@ -22,4 +24,10 @@ const router = createBrowserRouter([
   { path: "/profile", element: <Profile/> },
 ]);
 
-export default function AppRoutes(){ return <RouterProvider router={router}/>; }
+export default function AppRoutes(){
+  return (
+    <Suspense fallback={null}>
+      <RouterProvider router={router}/>
+    </Suspense>
+  );
+}

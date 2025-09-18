@@ -344,7 +344,7 @@ export default function Checkout() {
                           <Button
                             asChild
                             variant='outline'
-                            className='rounded-full h-9 sm:h-10 px-6 sm:px-[27px] text-sm'
+                            className='rounded-full text-sm sm:text-[16px] h-9 sm:h-10 px-6 sm:px-[27px] hover:font-bold hover:-translate-y-0.5'
                           >
                             <Link
                               to={getAddItemHref(
@@ -484,21 +484,21 @@ export default function Checkout() {
                               <img
                                 src={m.logo}
                                 alt={m.label}
-                                className='max-h-full max-w-full object-contain'
+                                className='max-h-full max-w-full object-contain cursor-pointer'
                                 onError={(e) => {
                                   const img = e.currentTarget as HTMLImageElement;
                                   img.style.visibility = 'hidden';
                                 }}
                               />
                             </span>
-                            <span className='text-gray-900 font-medium'>{m.label}</span>
+                            <span className='text-gray-950 cursor-pointer text-sm sm:text-[16px] font-medium'>{m.label}</span>
                           </div>
                           <input
                             type='radio'
                             name='method'
                             checked={isActive}
                             onChange={() => setMethod(m.id)}
-                            className='accent-[var(--color-brand,#D22B21)] size-5 sm:size-6'
+                            className='accent-[var(--color-brand,#D22B21)] cursor-pointer size-5 sm:size-6'
                           />
                         </label>
                       );
@@ -547,11 +547,11 @@ export default function Checkout() {
             <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
               <DialogContent className='sm:max-w-md'>
                 <DialogHeader>
-                  <DialogTitle>Confirm Payment</DialogTitle>
+                  <DialogTitle className='text-lg font-bold'>Confirm Payment</DialogTitle>
                 </DialogHeader>
-                <div className='text-sm text-gray-950'>
+                <div className='text-sm sm:text-[16px] text-gray-950'>
                   Proceed to pay{' '}
-                  <span className='font-semibold'>
+                  <span className='font-extrabold'>
                     {formatCurrency(grandTotal)}
                   </span>{' '}
                   for this order?
@@ -560,6 +560,7 @@ export default function Checkout() {
                   <Button
                     variant='outline'
                     onClick={() => setConfirmOpen(false)}
+                    className='cursor-pointer text-sm sm:text-[16px] hover:font-extrabold'
                   >
                     Cancel
                   </Button>
@@ -569,6 +570,7 @@ export default function Checkout() {
                       buy();
                     }}
                     disabled={isPlacing}
+                    className='cursor-pointer text-sm sm:text-[16px] hover:font-extrabold'
                   >
                     Yes, Pay
                   </Button>

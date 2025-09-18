@@ -37,7 +37,7 @@ export default function Home() {
   const geo = useGeolocation();
   const [recCount, setRecCount] = useState(16);
 
-  // React to login/logout without manual refresh
+ 
   useEffect(() => {
     const refreshToken = () => {
       try {
@@ -46,9 +46,9 @@ export default function Home() {
         setToken(null);
       }
     };
-    // Custom event fired from auth.ts on login success
+   
     window.addEventListener('auth:changed', refreshToken);
-    // Also update when tab gains focus (covers some edge cases)
+   
     window.addEventListener('focus', refreshToken);
     // Cross-tab login via storage event
     window.addEventListener('storage', refreshToken);
@@ -66,7 +66,7 @@ export default function Home() {
     setHasMore(true);
   }, [qDebounced, f.sort]);
 
-  // Accumulate non-recommended pages
+  
   useEffect(() => {
     if (recModeActive) return;
     if (!restaurants) return;
@@ -96,7 +96,7 @@ export default function Home() {
   return (
     <>
       <Navbar/>
-      {/* Hero area with image background and overlay */}
+      
       <section
         className="relative text-white -mt-20"
       >
@@ -130,11 +130,11 @@ export default function Home() {
         <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
           {[
             { label: 'All Restaurant', image: '/Categoryall.png', to: '/categories' },
-            { label: 'Nearby',        image: '/location.png' },
-            { label: 'Discount',      image: '/discount.png' },
-            { label: 'Best Seller',   image: '/bestseller.png' },
-            { label: 'Delivery',      image: '/delivery.png' },
-            { label: 'Lunch',         image: '/lunch.png' },
+            { label: 'Nearby',        image: '/location.png', to: '/categories' },
+            { label: 'Discount',      image: '/discount.png', to: '/categories' },
+            { label: 'Best Seller',   image: '/bestseller.png', to: '/categories' },
+            { label: 'Delivery',      image: '/delivery.png', to: '/categories'  },
+            { label: 'Lunch',         image: '/lunch.png', to: '/categories'  },
           ].map((c)=> {
             const content = (
               <div>

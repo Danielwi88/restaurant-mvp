@@ -72,11 +72,11 @@ export default function Auth() {
     } catch (err) {
       console.debug('remember init failed', err);
     }
-    // run only once on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    
+    
+  }, [setValue]);
 
-  // Disable vertical scroll while on the Auth page
+  
   useEffect(() => {
     const prevBodyOverflow = document.body.style.overflow;
     const prevHtmlOverflow = document.documentElement.style.overflow;
@@ -92,7 +92,7 @@ export default function Auth() {
     const mode = sp.get('mode');
     if (mode === 'up') setTab('up');
     if (mode === 'in') setTab('in');
-    // clear field errors/values when switching from link
+    
     reset({
       name: '',
       phone: '',
@@ -112,7 +112,7 @@ export default function Auth() {
           });
           setLoginLoading(true);
           await login.mutateAsync(parsed);
-          // persist remember me preference & email
+          
           try {
             if (rememberMe) {
               localStorage.setItem('remember_me', '1');
