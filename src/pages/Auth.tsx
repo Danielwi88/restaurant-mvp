@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { Toaster } from '@/components/ui/sonner';
 
 const signInSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Enter a valid email'),
@@ -114,7 +113,7 @@ export default function Auth() {
           } catch (err) {
             console.debug('remember persist failed', err);
           }
-          toast.success('Login successful. Welcome back!');
+          toast.success('Login successful. Welcome!');
           nav('/');
         } else {
           const parsed = signUpSchema.parse({
@@ -407,7 +406,7 @@ export default function Auth() {
           </CardContent>
         </Card>
       </div>
-      <Toaster position='top-right' richColors />
+      
     </div>
   );
 }

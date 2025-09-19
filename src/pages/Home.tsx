@@ -14,6 +14,7 @@ import { useRecommendedRestaurants, useRestaurants } from "@/services/queries/re
 import type { Restaurant } from "@/types";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function Home() {
   const f = useAppSelector((s: RootState) => s.filters);
@@ -38,6 +39,20 @@ export default function Home() {
   const [recCount, setRecCount] = useState(16);
 
  
+  // Show a welcome Sonner toast on first load if not signed in
+  useEffect(() => {
+    try {
+      const hasToken = typeof window !== 'undefined' ? !!localStorage.getItem('token') : false;
+      const toastShown = typeof window !== 'undefined' ? sessionStorage.getItem('welcome_toast_shown') : '1';
+      if (!hasToken && !toastShown) {
+        toast.info('welcome to restaurant app, please sign in to order');
+        sessionStorage.setItem('welcome_toast_shown', '1');
+      }
+    } catch {
+      // no-op
+    }
+  }, []);
+
   useEffect(() => {
     const refreshToken = () => {
       try {

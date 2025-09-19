@@ -16,13 +16,14 @@ import { clearCart, updateQty, decrementQty } from '@/features/cart/cartSlice';
 import type { RootState } from '@/features/store';
 import { useAppDispatch, useAppSelector } from '@/features/store';
 import { formatCurrency } from '@/lib/format';
-import { showToast } from '@/lib/toast';
+import { toast } from 'sonner';
 import { apiDelete, apiPost, apiPut } from '@/services/api/axios';
 import { useCreateOrder } from '@/services/queries/orders';
 import { MinusIcon, PlusIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRestaurant } from '@/services/queries/restaurants';
+import Footer from '@/components/Footer';
 
 export default function Checkout() {
   const d = useAppDispatch();
@@ -99,7 +100,7 @@ export default function Checkout() {
 
   const buy = async () => {
     setIsPlacing(true);
-    showToast('Your transaction is being processed');
+    toast.info('Your transaction is being processed');
     try {
       // Sync local cart to server before placing order
       const tokenNow =
@@ -237,7 +238,7 @@ export default function Checkout() {
           <div className='w-full mx-auto lg:mx-0 lg:max-w-[590px] space-y-6'>
             {/* Delivery Address card */}
             <Card className='w-full  rounded-2xl border border-neutral-200 shadow-sm'>
-              <CardContent className='p-0'>
+              <CardContent className='p-4 sm:p-0'>
                 <div className='flex items-start justify-between'>
                   <div>
                     <div className='flex items-center gap-2 text-zinc-800 text-[16px] sm:text-lg font-extrabold leading-8'>
@@ -321,7 +322,7 @@ export default function Checkout() {
 
             {/* Items Card */}
             <Card className='rounded-2xl border-none shadow-md'>
-              <CardContent className='p-0'>
+              <CardContent className='p-4 sm:p-0'>
                 <div className='flex items-center justify-between px-5 pt-0'>
                   {!items.length && (
                     <Button
@@ -466,18 +467,18 @@ export default function Checkout() {
             />
 
             <Card className='rounded-2xl border-none shadow-sm'>
-              <CardContent className='p-0'>
+              <CardContent className='p-4 sm:p-0'>
                 <div className='px-0 pt-0 font-extrabold mb-4 text-[16px] sm:text-lg'>
                   Payment Method
                 </div>
                 <div className='px-0 pb-2'>
-                  <div className='border-none overflow-hidden'>
+                  <div className='border-none'>
                     {methods.map((m) => {
                       const isActive = method === m.id;
                       return (
                         <label
                           key={m.id}
-                          className={`flex items-center justify-between gap-4 px-4 py-3 text-sm sm:text-[16px] border-b border-neutral-200 last:border-b-0 transition-colors ${isActive ? 'bg-white' : 'bg-white hover:scale-105'}`}
+                          className={`flex items-center justify-between gap-4 px-0 py-3 text-sm sm:text-[16px] border-b border-neutral-200 last:border-b-0 transition-colors ${isActive ? 'bg-white' : 'bg-white'}`}
                         >
                           <div className='flex items-center gap-3'>
                             <span className='flex size-11 items-center justify-center overflow-hidden rounded-xl border border-neutral-200 bg-white'>
@@ -498,7 +499,7 @@ export default function Checkout() {
                             name='method'
                             checked={isActive}
                             onChange={() => setMethod(m.id)}
-                            className='accent-[var(--color-brand,#D22B21)] cursor-pointer size-5 sm:size-6'
+                            className='accent-[var(--color-brand,#D22B21)] cursor-pointer size-5 sm:size-6 shrink-0 align-middle'
                           />
                         </label>
                       );
@@ -508,9 +509,9 @@ export default function Checkout() {
               </CardContent>
             </Card>
 
-            <div className='norder border-1 border-dashed border-gray-300' />
+            <div className='border border-dashed border-gray-300 mx-5' />
             <Card className='rounded-2xl border-none shadow-md'>
-              <CardContent className='p-0'>
+              <CardContent className='p-4 sm:p-0'>
                 <div className='font-extrabold mb-4 text-lg sm:text-[16px] '>
                   Payment Summary
                 </div>
@@ -610,6 +611,7 @@ export default function Checkout() {
           </div>
         )}
       </div>
+      <Footer/>
     </>
   );
 }

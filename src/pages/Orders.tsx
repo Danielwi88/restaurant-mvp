@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency } from '@/lib/format';
-import { showToast } from '@/lib/toast';
+import { toast } from 'sonner';
 import { useOrders } from '@/services/queries/orders';
 import { useServerCart } from '@/services/queries/cart';
 import { useRestaurantMenuImages } from '@/services/queries/menu-images';
@@ -21,7 +21,7 @@ import { useCreateReview } from '@/services/queries/reviews';
 import { useQueryClient } from '@tanstack/react-query';
 import { MapPinIcon, StarIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 type StatusTab =
   | 'preparing'
@@ -88,7 +88,7 @@ export default function Orders() {
     setUser(null);
     setCanFetchCart(false);
     qc.clear();
-    showToast('Logged out successfully', 'success');
+    toast.success('Logged out successfully');
     nav('/');
   };
 
@@ -178,8 +178,9 @@ export default function Orders() {
           phone: u.phone ?? '',
         }));
       }
-    } catch {
-      // ignore JSON parse errors
+    } catch (err) {
+      if (import.meta.env.DEV)
+        console.warn('[orders] failed to parse user from storage', err);
     }
     setCanFetchCart(!!localStorage.getItem('token'));
   }, []);
@@ -193,13 +194,15 @@ export default function Orders() {
           <Card className='rounded-2xl shadow-[0_0_20px_rgba(203,202,202,0.25)]'>
             <CardContent className='p-0 space-y-12'>
               <div className='flex items-center gap-3'>
-                <Avatar className='size-10 sm:size-12 shrink-0 aspect-square bg-black p-0'>
-                  <AvatarImage
-                    src={avatarUrl}
-                    alt={name}
-                    className='object-contain object-center'
-                  />
-                </Avatar>
+                <Link to='/profile' aria-label='Go to profile'>
+                  <Avatar className='size-10 sm:size-12 shrink-0 aspect-square bg-black p-0 cursor-pointer'>
+                    <AvatarImage
+                      src={avatarUrl}
+                      alt={name}
+                      className='object-contain object-center'
+                    />
+                  </Avatar>
+                </Link>
                 <div className='font-medium'>{form.name || 'User'}</div>
               </div>
 
@@ -233,9 +236,9 @@ export default function Orders() {
 
         {/* Right content */}
         <section>
-          <h2 className='text-2xl font-semibold mb-4'>My Orders</h2>
+          <h2 className='text-2xl sm:text-[32px] font-extrabold mb-4'>My Orders</h2>
           <Card className='rounded-2xl shadow-[0_0_20px_rgba(203,202,202,0.25)] border-none bg-white'>
-            <CardContent className='sm:p-2'>
+            <CardContent className='p-4 sm:p-2'>
               <div className='flex items-center gap-3 '>
                 <div className='relative w-full max-w-[598px]  '>
                   <span className='absolute left-3 top-1/2 -translate-y-1/2  text-gray-500 font-normal'>
@@ -308,7 +311,7 @@ export default function Orders() {
                         key={order.id}
                         className='rounded-2xl border-none shadow-[0_0_20px_rgba(203,202,202,0.25)]'
                       >
-                        <CardContent className='p-1'>
+                        <CardContent className='p-4 sm:p-1'>
                           <div className='flex gap-2 mb-4'>
                             <img
                               src='/iconRectangle.png'
@@ -345,7 +348,7 @@ export default function Orders() {
                               </div>
                             </div>
                           </div>
-                          <div className='mt-3 sm:mt-8 flex justify-between'>
+                          <div className='mt-3 sm:mt-8 sm:flex justify-between'>
                             <div className='text-left'>
                               <div className='text-[16px] text-zinc-500'>
                                 Total
@@ -355,7 +358,7 @@ export default function Orders() {
                               </div>
                             </div>
                             <Button
-                              className='rounded-full px-5 h-[48px] w-[240px] cursor-pointer'
+                              className='rounded-full mt-3 sm:mt-0 px-5 h-[48px] w-full sm:w-[240px] cursor-pointer'
                               onClick={() => {
                                 setCurrent({
                                   tx: order.transactionId,
@@ -389,7 +392,7 @@ export default function Orders() {
 
       {/* Give Review Modal */}
       <Dialog open={reviewOpen} onOpenChange={setReviewOpen}>
-        <DialogContent className='w-full mx-auto sm:w-[439px] sm:max-w-md rounded-2xl'>
+        <DialogContent className='w-full sm:mx-auto xm:w-[439px] min-w-[260px] sm:max-w-md rounded-2xl'>
           <DialogHeader>
             <DialogTitle className='text-[20px] leading-[34px] sm:text-[24px] sm:leading-[36px] font-extrabold text-gray-950'>Give Review</DialogTitle>
           </DialogHeader>

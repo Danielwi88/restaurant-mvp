@@ -3,12 +3,14 @@ import { Button } from '@/components/ui/button';
 import { LogoutDialog } from '@/components/ui/dialog';
 import {
   DropdownMenu,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { setServerCartItemId } from '@/features/cart/cartSlice';
 import type { RootState } from '@/features/store';
 import { useAppDispatch, useAppSelector } from '@/features/store';
-import { showToast } from '@/lib/toast';
+import { toast } from 'sonner';
 import { apiPost, apiPut } from '@/services/api/axios';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -110,7 +112,7 @@ export default function Navbar() {
       } catch {
         void 0;
       }
-      showToast('Updating orders...');
+      toast.success('Updating orders...', { className: 'mt-25 sm:mt-0' });
       const ops = items.map(async (it) => {
         if (it.serverCartItemId) {
           
@@ -139,7 +141,7 @@ export default function Navbar() {
       await Promise.allSettled(ops);
     } catch (e) {
       if (import.meta.env.DEV) console.error('[navbar] cart sync failed', e);
-      showToast('Some items failed to sync. Check your cart.', 'error');
+      toast.error('Some items failed to sync. Check your cart.');
     } finally {
       try {
         window.dispatchEvent(
@@ -235,53 +237,88 @@ export default function Navbar() {
           </button>
 
           {!token ? (
-            <div className='flex items-center gap-2'>
-              {/* Compute active states: default to Sign Up when mode is empty */}
-              {(() => {
-                const upActive = (mode === 'up' || !mode) && hovering !== 'in';
-                const inActive = mode === 'in' && hovering !== 'up';
+            <>
+              {/* Desktop buttons */}
+              <div className='hidden sm:flex items-center gap-2'>
+                {(() => {
+                  const upActive = (mode === 'up' || !mode) && hovering !== 'in';
+                  const inActive = mode === 'in' && hovering !== 'up';
 
-                const baseBtn =
-                  'h-12 w-[163px] rounded-full text-[16px] font-bold border-2 transition-colors';
-                const inactive = `bg-transparent border-gray-300 cursor-pointer ${
-                  !scrolled && isHome ? 'text-white' : 'text-gray-950'
-                }`;
+                  const baseBtn =
+                    'h-12 w-[163px] rounded-full text-[16px] font-bold border-2 transition-colors';
+                  const inactive = `bg-transparent border-gray-300 cursor-pointer ${
+                    !scrolled && isHome ? 'text-white' : 'text-gray-950'
+                  }`;
 
-                return (
-                  <>
-                    <Button
-                      className={`${baseBtn} ${
-                        inActive
-                          ? 'bg-white text-gray-950 border-gray-300'
-                          : inactive
+                  return (
+                    <>
+                      <Button
+                        className={`${baseBtn} ${
+                          inActive
+                            ? 'bg-white text-gray-950 border-gray-300'
+                            : inactive
+                        }`}
+                        variant='outline'
+                        asChild
+                        aria-label='Sign in'
+                        onMouseEnter={() => setHovering('in')}
+                        onMouseLeave={() => setHovering(null)}
+                      >
+                        <Link to='/auth?mode=in'>Sign In</Link>
+                      </Button>
+
+                      <Button
+                        className={`${baseBtn} ${
+                          upActive
+                            ? 'bg-white text-gray-950 border-gray-300'
+                            : inactive
+                        }`}
+                        variant='outline'
+                        asChild
+                        aria-label='Sign up'
+                        onMouseEnter={() => setHovering('up')}
+                        onMouseLeave={() => setHovering(null)}
+                      >
+                        <Link to='/auth?mode=up'>Sign Up</Link>
+                      </Button>
+                    </>
+                  );
+                })()}
+              </div>
+
+              {/* Mobile hamburger */}
+              <div className='sm:hidden'>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      aria-label='Open menu'
+                      className={`relative w-8 h-8 grid place-items-center cursor-pointer ${
+                        !scrolled && isHome ? 'text-white' : 'text-zinc-900'
                       }`}
-                      variant='outline'
-                      asChild
-                      aria-label='Sign in'
-                      onMouseEnter={() => setHovering('in')}
-                      onMouseLeave={() => setHovering(null)}
                     >
-                      <Link to='/auth?mode=in'>Sign In</Link>
-                    </Button>
-
-                    <Button
-                      className={`${baseBtn} ${
-                        upActive
-                          ? 'bg-white text-gray-950 border-gray-300'
-                          : inactive
-                      }`}
-                      variant='outline'
-                      asChild
-                      aria-label='Sign up'
-                      onMouseEnter={() => setHovering('up')}
-                      onMouseLeave={() => setHovering(null)}
-                    >
-                      <Link to='/auth?mode=up'>Sign Up</Link>
-                    </Button>
-                  </>
-                );
-              })()}
-            </div>
+                      <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        viewBox='0 0 24 24'
+                        fill='none'
+                        className='size-7'
+                      >
+                        <path d='M4 6h16' stroke='currentColor' strokeWidth='2' strokeLinecap='round' />
+                        <path d='M4 12h16' stroke='currentColor' strokeWidth='2' strokeLinecap='round' />
+                        <path d='M4 18h16' stroke='currentColor' strokeWidth='2' strokeLinecap='round' />
+                      </svg>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className='w-48' sideOffset={10}>
+                    <DropdownMenuItem onSelect={() => nav('/auth?mode=in')} className='cursor-pointer hover:scale-105 hover:font-bold'>
+                      Sign In
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => nav('/auth?mode=up')} className='cursor-pointer hover:scale-105 hover:font-bold'>
+                      Sign Up
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </>
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

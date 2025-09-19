@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,7 +8,7 @@ import { decrementQty, incrementQty } from "@/features/cart/cartSlice";
 import type { RootState } from "@/features/store";
 import { useAppDispatch, useAppSelector } from "@/features/store";
 import { formatCurrency } from "@/lib/format";
-import { showHomeToast } from "@/lib/toast";
+import { toast } from "sonner";
 import { useRestaurant } from "@/services/queries/restaurants";
 import type { CartItem } from "@/types";
 import { ChevronRightIcon, MinusIcon, PlusIcon } from "lucide-react";
@@ -22,11 +23,11 @@ export default function CartPage() {
   const nav = useNavigate();
   const emptyToastShown = useRef(false);
 
-  // Show a top-left toast with Home button when cart is empty
+  // Show a one-time Sonner toast when cart is empty
   useEffect(() => {
     if (items.length === 0 && !emptyToastShown.current) {
       emptyToastShown.current = true;
-      showHomeToast('Cart is empty. Click the Foody icon to go home.');
+      toast.info('Your cart is empty. Browse items to continue.');
     }
   }, [items.length]);
 
@@ -95,15 +96,15 @@ export default function CartPage() {
     <>
       
       <Navbar/>
-    <div className="max-w-[800px]  sm:mx-auto mx-4 py-12 overflow-hidden">
+    <div className="w-full max-w-[800px] mx-auto px-4 py-12">
       <h2 className="text-[32px] font-extrabold mb-4 sm:mb-8">My Cart</h2>
 
       <div className="space-y-5">
         {groups.map((g) => {
           const groupTotal = g.items.reduce((a, b) => a + b.price * b.qty, 0);
           return (
-            <Card key={g.restaurantId} className="rounded-2xl min-w-[360px] shadow-[0_0_20px_rgba(203,202,202,0.25)]">
-              <CardContent className="p-0">
+            <Card key={g.restaurantId} className="rounded-2xl w-full shadow-[0_0_20px_rgba(203,202,202,0.25)]">
+              <CardContent className="p-4 sm:p-0">
                 <GroupHeader restaurantId={g.restaurantId} />
                 <div className="mt-5 space-y-3 sm:space-y-5">
                   {g.items.map((it) => (
@@ -132,6 +133,7 @@ export default function CartPage() {
                 </div>
 
                 <Separator className="my-4" />
+                
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
                   <div className="text-sm">
                     <div className="text-gray-950 text-sm sm:text-[16px] sm:leading-[30px]">Total</div>
@@ -149,7 +151,7 @@ export default function CartPage() {
 
         {!items.length && (
           <Card className="shadow-sm border border-neutral-200 rounded-2xl">
-            <CardContent className="p-6 text-center text-zinc-500">
+            <CardContent className="p-6 text-center text-gray-500">
               Your cart is empty.
             </CardContent>
           </Card>
@@ -158,6 +160,7 @@ export default function CartPage() {
 
       
     </div>
+    <Footer/>
     </>
   );
 }

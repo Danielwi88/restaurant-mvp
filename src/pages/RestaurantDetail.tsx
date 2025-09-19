@@ -316,9 +316,7 @@ export default function RestaurantDetail() {
                     <div className='flex items-center gap-3'>
                       <Avatar className='size-16'>
                         <AvatarImage src={restaurant?.logoUrl} alt={restaurant?.name} />
-                        {/* <AvatarFallback className='bg-neutral-100 text-gray-600 font-semibold'>
-                          {(restaurant?.name ?? '?').slice(0, 2).toUpperCase()}
-                        </AvatarFallback> */}
+                        
                       </Avatar>
                       <div>
                         <div className='text-lg font-semibold text-gray-950'>

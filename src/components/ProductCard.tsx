@@ -139,20 +139,20 @@ export default function ProductCard({
         {qty > 0 ? (
           <div className='flex items-center justify-center gap-4'>
             <button
-              className='size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 text-lg sm:text-xl cursor-pointer'
+              className='size-8 xs:size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 text-lg sm:text-xl cursor-pointer'
               aria-label='Decrease quantity'
               onClick={() => d(decrementQty({ id: item.id }))}
             >
               -
             </button>
             <div
-              className='w-8 text-center text-base sm:text-lg font-semibold'
+              className='w-0 xs:w-4 sm:w-8 text-center text-base sm:text-lg font-semibold'
               aria-live='polite'
             >
               {qty}
             </div>
             <button
-              className='size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center text-lg sm:text-xl cursor-pointer'
+              className='size-8 xs:size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center text-lg sm:text-xl cursor-pointer'
               aria-label='Increase quantity'
               onClick={() => d(incrementQty({ id: item.id }))}
             >

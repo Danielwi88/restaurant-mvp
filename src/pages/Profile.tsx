@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { LogoutDialog } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { showToast } from '@/lib/toast';
+import { toast } from 'sonner';
 import { useProfile, useUpdateProfile } from '@/services/queries/auth';
 import { useQueryClient } from '@tanstack/react-query';
 import { MapPinIcon } from 'lucide-react';
@@ -37,7 +37,7 @@ export default function Profile() {
     localStorage.removeItem('user');
     setUser(null);
     qc.clear();
-    showToast('Logged out successfully', 'success');
+    toast.success('Logged out successfully');
     nav('/');
   };
 
@@ -61,7 +61,7 @@ export default function Profile() {
       });
       setForm((f) => ({ ...f, currentPassword: '', newPassword: '' }));
     } catch {
-      showToast('Failed to update profile', 'error');
+      toast.error('Failed to update profile');
     }
   };
 
