@@ -164,19 +164,21 @@ export default function Auth() {
   );
 
   return (
-    <div className='grid md:grid-cols-2 gap-5 h-[100dvh] overflow-hidden'>
+    <div className='grid md:grid-cols-2 gap-5 h-auto'>
       <img
         src='/burger-login.png'
         alt='burger-login'
-        className='hidden md:block h-[100dvh] w-full object-cover'
+        className='hidden md:block w-full h-[100dvh] object-cover'
       />
       <div
         className={`flex justify-center p-6 ${
-          tab === 'up' ? 'md:mt-[151px]' : 'md:mt-[272px]'
+          tab === 'up'
+            ? 'md:mt-[clamp(0px,15vh,87px)]'
+            : 'md:mt-[clamp(0px,15vh,192px)]'
         }`}
       >
-        <Card className='max-w-md border-none shadow-none w-full'>
-          <CardContent className='p-6'>
+        <Card className='max-w-md border-none shadow-none min-h-[480px] max-h-[698px] w-full'>
+          <CardContent className='p-4 sm:p-6 sm:pt-0'>
             <div className='flex gap-[15px] mb-4 sm:mb-5'>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
