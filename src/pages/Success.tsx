@@ -56,40 +56,40 @@ export default function Success(){
               />
             </g>
           </svg>
-          <div className='hidden sm:block text-[32px] font-extrabold leading-[42px]'>
+          <div className='block text-[32px] font-extrabold leading-[42px]'>
             Foody
           </div>
       </div>
 
       <div className="relative">
         {/* side notches */}
-        <span className="hidden sm:block absolute -left-3 top-40 -translate-y-1/2 size-6 rounded-full bg-neutral-50 border border-gray-50" aria-hidden="true" />
-        <span className="hidden sm:block absolute -right-3 top-40 -translate-y-1/2 size-6 rounded-full bg-neutral-50 border border-neutral-50" aria-hidden="true" />
-        <span className="hidden sm:block absolute -left-3 top-95 -translate-y-1/2 size-6 rounded-full bg-neutral-50 border border-gray-50" aria-hidden="true" />
-        <span className="hidden sm:block absolute -right-3 top-95 -translate-y-1/2 size-6 rounded-full bg-neutral-50 border border-neutral-50" aria-hidden="true" />
+        <span className="block absolute -left-3 top-39 sm:top-40 -translate-y-1/2 size-6 rounded-full bg-neutral-50 border border-neutral-50" aria-hidden="true" />
+        <span className="absolute -right-3 top-39 sm:top-40 -translate-y-1/2 size-6 rounded-full bg-neutral-50 border border-neutral-50" aria-hidden="true" />
+        <span className="absolute -left-3 top-90 sm:top-95 -translate-y-1/2 size-6 rounded-full bg-neutral-50 border border-gray-50" aria-hidden="true" />
+        <span className="absolute -right-3 top-90 sm:top-95 -translate-y-1/2 size-6 rounded-full bg-neutral-50 border border-neutral-50" aria-hidden="true" />
 
         <Card className="max-w-md w-full sm:w-[428px] text-left rounded-2xl shadow-sm">
-          <CardContent className="p-0">
+          <CardContent className="p-4 sm:p-0">
             <div className="text-center flex flex-col items-center ">
               
               <img src="/icongreen.svg" alt="icon" width='64' height='64' className=""/>
 
-              <div className="text-[20px] font-extrabold pt-[2px] leading-[34px]">Payment Success</div>
+              <div className="text-lg sm:text-[20px] font-extrabold pt-[2px] leading-[34px]">Payment Success</div>
               
-              <p className="text-gray-950 font-normal text-sm mt-1 leading-[30px] text-[16px] pb-[6px]">Your payment has been successfully processed.</p>
+              <p className="text-gray-950 font-normal text-sm mt-1 leading-[30px] sm:text-[16px] pb-[6px]">Your payment has been successfully processed.</p>
             </div>
             <div className="border-t border-dashed border-neutral-200" />
             <div className="px-5 pt-5 space-y-4 text-[16px] text-gray-950">
 
-              <div className="flex justify-between"><span className="text-gray-950">Date</span><span className="font-bold">{dateStr}</span></div>
-              <div className="flex justify-between"><span className="text-gray-950">Payment Method</span><span className="font-bold">{method}</span></div>
-              <div className="flex justify-between"><span className="text-gray-950">Price ({itemsCount} {itemsCount===1?'item':'items'})</span><span className="font-bold">{formatCurrency(subtotal)}</span></div>
-              <div className="flex justify-between"><span className="text-gray-950">Delivery Fee</span><span className="font-bold">{formatCurrency(deliveryFee)}</span></div>
-              <div className="flex justify-between"><span className="text-gray-950">Service Fee</span><span className="font-bold">{formatCurrency(serviceFee)}</span></div>
-              <div className="border-t border-dashed border-neutral-200 pt-3 flex justify-between font-normal text-lg">
-                <span>Total</span><span className="font-extrabold">{formatCurrency(total)}</span>
+              <div className="flex justify-between"><span className="text-gray-950 text-sm sm:text-[16px]">Date</span><span className="text-sm sm:text-[16px] font-semibold sm:font-bold">{dateStr}</span></div>
+              <div className="flex justify-between"><span className="text-gray-950 text-sm sm:text-[16px]">Payment Method</span><span className="text-sm sm:text-[16px] font-semibold sm:font-bold">{method}</span></div>
+              <div className="flex justify-between"><span className="text-gray-950 text-sm sm:text-[16px]">Price ({itemsCount} {itemsCount===1?'item':'items'})</span><span className="text-sm sm:text-[16px] font-semibold sm:font-bold">{formatCurrency(subtotal)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-950 text-sm sm:text-[16px]">Delivery Fee</span><span className="text-sm sm:text-[16px] font-semibold sm:font-bold">{formatCurrency(deliveryFee)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-950 text-sm sm:text-[16px]">Service Fee</span><span className="text-sm sm:text-[16px] font-semibold sm:font-bold">{formatCurrency(serviceFee)}</span></div>
+              <div className="border-t border-dashed border-neutral-200 pt-3 flex justify-between font-normal text-[16px] sm:text-lg">
+                <span>Total</span><span className="text-[16px] sm:text-lg font-extrabold">{formatCurrency(total)}</span>
               </div>
-              <Button asChild className="w-full mt-2 h-12 rounded-full bg-[var(--color-brand,#D22B21)]">
+              <Button asChild className="w-full mt-2 h-11 rounded-full bg-[var(--color-brand,#D22B21)]">
                 <Link to="/orders">See My Orders</Link>
               </Button>
             </div>

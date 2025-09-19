@@ -76,17 +76,7 @@ export default function Auth() {
     
   }, [setValue]);
 
-  
-  useEffect(() => {
-    const prevBodyOverflow = document.body.style.overflow;
-    const prevHtmlOverflow = document.documentElement.style.overflow;
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prevBodyOverflow;
-      document.documentElement.style.overflow = prevHtmlOverflow;
-    };
-  }, []);
+  // Removed global scroll lock to allow the right panel to scroll
 
   useEffect(() => {
     const mode = sp.get('mode');
@@ -168,16 +158,12 @@ export default function Auth() {
       <img
         src='/burger-login.png'
         alt='burger-login'
-        className='hidden md:block w-full h-[100dvh] object-cover'
+        className='hidden md:block w-full h-[100dvh] object-cover md:sticky md:top-0'
       />
       <div
-        className={`flex justify-center p-6 ${
-          tab === 'up'
-            ? 'md:mt-[clamp(0px,15vh,87px)]'
-            : 'md:mt-[clamp(0px,15vh,192px)]'
-        }`}
+        className='flex justify-center p-6 my-auto'
       >
-        <Card className='max-w-md border-none shadow-none min-h-[480px] max-h-[698px] w-full'>
+        <Card className='max-w-md border-none shadow-none bg-neutral-50 min-h-[480px] max-h-[698px] w-full'>
           <CardContent className='p-4 sm:p-6 sm:pt-0'>
             <div className='flex gap-[15px] mb-4 sm:mb-5'>
               <svg
@@ -222,7 +208,7 @@ export default function Auth() {
                 onClick={() => setTab('in')}
                 className={`h-9 sm:h-10 rounded-md sm:rounded-xl border-none shadow-none cursor-pointer ${
                   tab === 'in'
-                    ? 'bg-white text-gray-950 hover:bg-white hover:font-bold'
+                    ? 'bg-white text-gray-950 hover:bg-white hover:text-gray-950 hover:font-bold'
                     : 'bg-transparent text-gray-600 hover:bg-white hover:text-gray-950'
                 }`}
               >
@@ -233,7 +219,7 @@ export default function Auth() {
                 onClick={() => setTab('up')}
                 className={`h-9 sm:h-10 rounded-md sm:rounded-xl border-none shadow-none cursor-pointer ${
                   tab === 'up'
-                    ? 'bg-white text-gray-950 hover:bg-white hover:font-bold'
+                    ? 'bg-white text-gray-950 hover:bg-white hover:text-gray-950 hover:font-bold'
                     : 'bg-transparent text-gray-600 hover:bg-white hover:text-gray-950'
                 }`}
               >
@@ -243,7 +229,7 @@ export default function Auth() {
 
             <form
               onSubmit={onSubmit}
-              className=' space-y-4 sm:space-y-5 h-12 sm:h-[56px] '
+              className='space-y-4 sm:space-y-5'
             >
               {tab === 'up' && (
                 <>
@@ -408,7 +394,7 @@ export default function Auth() {
                 </div>
               )}
               <Button
-                className='cursor-pointer rounded-full w-full'
+                className='cursor-pointer rounded-full w-full h-12'
                 disabled={tab === 'in' && loginLoading}
               >
                 {tab === 'in'

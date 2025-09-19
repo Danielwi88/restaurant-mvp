@@ -23,7 +23,7 @@ export default function Providers({ children }: { children: ReactNode }) {
         {children}
         <GlobalModal />
         {/* Move the Sonner toaster lower by adding a top offset */}
-        <Toaster position="top-right" offset={80} richColors />
+        <Toaster position="top-right" offset={100} richColors />
         {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />}
       </QueryClientProvider>
     </Provider>

@@ -112,8 +112,8 @@ export default function Home() {
           <p className="max-w-2xl mx-auto mt-3 text-center text-white/90">
             Search and refine your choice to discover the perfect restaurant.
           </p>
-          <div className="max-w-[1200px] place-items-center mt-8">
-            <div className="bg-white w-full mx-[22px] sm:mx-auto md:w-[604px] flex justify-center rounded-full p-1.5 shadow-md items-center">
+          <div className="max-w-[1200px] place-items-center mt-8 px-4 sm:px-0">
+            <div className="bg-white w-full mx-auto md:w-[604px] flex justify-center rounded-full p-1.5 shadow-md items-center">
               <Input
                 className="rounded-full border-0 focus-visible:ring-[3px] text-zinc-800"
                 placeholder="Search restaurants, food and drink"

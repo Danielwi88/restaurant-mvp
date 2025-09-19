@@ -38,7 +38,7 @@ export default function Footer() {
             
             
           </div>
-          <p className="mt-3 text-[16px] leading-[30px] font-regular text-gray-25 w-[380px]">
+          <p className="mt-3 text-[16px] leading-[30px] font-regular text-gray-25 w-full max-w-[380px]">
             Enjoy homemade flavors & chef's signature dishes, freshly prepared every day. Order online or visit our nearest branch.
           </p>
           <p className="mt-4 sm:mt-10 mb-5">Follow on Social Media</p>
