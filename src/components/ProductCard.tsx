@@ -122,7 +122,7 @@ export default function ProductCard({
       <CardContent className='px-4 pb-4 pt-3 space-y-3'>
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1 min-w-0'>
-            <div className='text-sm sm:text-base font-medium text-gray-950 line-clamp-2'>
+            <div className='text-sm sm:text-base font-medium text-gray-950 line-clamp-2 min-h-[2lh] sm:min-h-[1lh] overflow-hidden'>
               {item.name}
             </div>
             <div className='mt-1 text-lg font-extrabold text-gray-950'>

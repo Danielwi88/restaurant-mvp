@@ -47,7 +47,7 @@ export default function CartPage() {
   const QtyControl = ({ id, qty, pending }: { id: string; qty: number; pending?: boolean }) => (
     <div className="flex items-center gap-2">
       <button
-        className="size-7 xs:size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 disabled:opacity-60 cursor-pointer"
+        className="size-7 xs:size-8 xm:size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 disabled:opacity-60 cursor-pointer"
         aria-label="Decrease quantity"
         disabled={pending}
         onClick={() => { d(decrementQty({ id })); }}
@@ -56,7 +56,7 @@ export default function CartPage() {
       </button>
       <div className="px-0 sm:px-4 text-center text-[16px] sm:text-lg font-semibold">{qty}</div>
       <button
-        className="size-7 xs:size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center disabled:opacity-60 cursor-pointer"
+        className="size-7 xs:size-8 xm:size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center disabled:opacity-60 cursor-pointer"
         aria-label="Increase quantity"
         disabled={pending}
         onClick={() => { d(incrementQty({ id })); }}
@@ -67,7 +67,7 @@ export default function CartPage() {
   );
 
   const syncAndGoCheckout = async () => {
-    // No backend sync required; rely on Redux state only
+    
     nav('/checkout');
   };
 

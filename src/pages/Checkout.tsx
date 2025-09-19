@@ -162,7 +162,7 @@ export default function Checkout() {
         },
       });
 
-      // clear the cart in background (server + local)
+      
       void (async () => {
         try {
           await apiDelete('cart');
@@ -382,12 +382,12 @@ export default function Checkout() {
                             ) : (
                               <div
                                 key={i.id}
-                                className='flex items-center gap-x-[17px]'
+                                className='flex items-center gap-4 sm:gap-x-[17px]'
                               >
                                 <img
                                   src={i.imageUrl || '/iconRectangle.png'}
                                   alt={i.name}
-                                  className='h-20 w-20 object-cover rounded-lg'
+                                  className='size-16 sm:h-20 sm:w-20 object-cover rounded-xl'
                                   onError={(e) => {
                                     const img =
                                       e.currentTarget as HTMLImageElement;
@@ -400,16 +400,16 @@ export default function Checkout() {
                                   }}
                                 />
                                 <div className='flex-1'>
-                                  <div className='text-sm sm:text-[16px] leading-[30px] text-gray-950'>
+                                  <div className='text-sm sm:text-[16px] sm:leading-[30px] text-gray-950'>
                                     {i.name}
                                   </div>
-                                  <div className='text-gray-950 font-extrabold text-lg leading-[32px]'>
+                                  <div className='text-gray-950 text-[16px] font-extrabold sm:text-lg leading-[32px] overflow-ellipsis'>
                                     {formatCurrency(i.price)}
                                   </div>
                                 </div>
-                                <div className='flex items-center gap-2'>
+                                <div className='flex items-center gap-0 sm:gap-2'>
                                   <button
-                                className='size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 disabled:opacity-60  cursor-pointer'
+                                className='size-7 xs:size-8 xm:size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 disabled:opacity-60  cursor-pointer'
                                     aria-label='Decrease'
                                     onClick={() => {
                                       d(decrementQty({ id: i.id }));
@@ -422,7 +422,7 @@ export default function Checkout() {
                                     {i.qty}
                                   </div>
                                   <button
-                                    className='size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center disabled:opacity-60 cursor-pointer'
+                                    className='size-7 xs:size-8 xm:size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center disabled:opacity-60 cursor-pointer'
                                     aria-label='Increase'
                                     onClick={() => {
                                       const next = i.qty + 1;

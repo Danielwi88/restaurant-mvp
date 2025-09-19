@@ -26,7 +26,7 @@ export default function Success(){
   const method = s?.paymentMethod ?? "—";
 
   return (
-    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4">
+    <div className="min-h-[80dvh] flex flex-col items-center justify-center px-4 mt-8 mx-auto sm:my-auto">
       <div className="flex gap-x-[15px] mb-7">
 
       <svg
