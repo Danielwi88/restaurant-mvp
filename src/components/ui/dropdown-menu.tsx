@@ -35,10 +35,14 @@ export function DropdownMenuContent({
   children,
   className,
   sideOffset = 8,
+  withOverlay = false,
+  overlayClassName,
 }: {
   children: React.ReactNode;
   className?: string;
   sideOffset?: number;
+  withOverlay?: boolean;
+  overlayClassName?: string;
 }) {
   const ctx = React.useContext(MenuCtx)!;
   const [pos, setPos] = React.useState<{ top: number; left: number } | null>(null);
@@ -64,17 +68,29 @@ export function DropdownMenuContent({
 
   if (!ctx.open || !pos) return null;
   return createPortal(
-    <div
-      className={cn(
-        "z-50 min-w-56 rounded-xl border bg-white p-2 shadow-2xl w-[197px]",
-        "animate-in fade-in-0 zoom-in-95",
-        className
+    <>
+      {withOverlay && (
+        <div
+          className={cn(
+            "fixed inset-0 bg-black/50 z-40",
+            overlayClassName
+          )}
+          aria-hidden
+          onClick={() => ctx.setOpen(false)}
+        />
       )}
-      style={{ position: "absolute", top: pos.top, left: pos.left, transform: "translateX(-100%)" }}
-      role="menu"
-    >
-      {children}
-    </div>,
+      <div
+        className={cn(
+          "z-50 min-w-56 rounded-xl border bg-white p-2 shadow-2xl w-[197px]",
+          "animate-in fade-in-0 zoom-in-95",
+          className
+        )}
+        style={{ position: "absolute", top: pos.top, left: pos.left, transform: "translateX(-100%)" }}
+        role="menu"
+      >
+        {children}
+      </div>
+    </>,
     document.body
   );
 }

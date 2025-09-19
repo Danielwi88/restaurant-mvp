@@ -332,16 +332,19 @@ export default function Navbar() {
                       </svg>
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className='w-48' sideOffset={10}>
+                  <DropdownMenuContent
+                    className='sm:w-48 py-4 flex flex-col gap-4'
+                    sideOffset={10}
+                  >
                     <DropdownMenuItem
                       onSelect={() => nav('/auth?mode=in')}
-                      className='cursor-pointer hover:scale-105 hover:font-bold'
+                      className='cursor-pointer rounded-full border border-gray-200 hover:bg-brand hover:text-white hover:scale-105 hover:font-bold text-lg flex justify-center'
                     >
                       Sign In
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onSelect={() => nav('/auth?mode=up')}
-                      className='cursor-pointer hover:scale-105 hover:font-bold'
+                      className='cursor-pointer border hover:shadow-md rounded-full hover:bg-brand border-gray-200 hover:text-white hover:scale-105 hover:font-bold text-lg flex justify-center'
                     >
                       Sign Up
                     </DropdownMenuItem>
