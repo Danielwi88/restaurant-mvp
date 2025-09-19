@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiDelete, apiGet, apiPost } from "../api/axios";
 import type { Order, CartItem } from "../../types";
-import { showToast } from "@/lib/toast";
+import { toast } from "sonner";
 
 type OrdersApiResponse = {
   success?: boolean;
@@ -108,6 +108,6 @@ export const useRemoveCartItem = () =>
     },
     onSuccess: (res) => {
       const msg = res?.message || 'Item removed from cart successfully';
-      showToast(msg, 'success');
+      toast.success(msg);
     },
   });

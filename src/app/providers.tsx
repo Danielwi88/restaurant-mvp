@@ -26,7 +26,7 @@ export default function Providers({ children }: { children: ReactNode }) {
         <Toaster
           position='top-right'
           offset={100}
-          mobileOffset={100}
+          mobileOffset={80}
           richColors
         />
         {import.meta.env.DEV && (

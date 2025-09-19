@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
   LogoutDialog,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -17,7 +18,8 @@ import { toast } from 'sonner';
 import { useOrders } from '@/services/queries/orders';
 import { useServerCart } from '@/services/queries/cart';
 import { useRestaurantMenuImages } from '@/services/queries/menu-images';
-import { useCreateReview } from '@/services/queries/reviews';
+import { useCreateReview, useUpdateReview } from '@/services/queries/reviews';
+import { apiGet } from '@/services/api/axios';
 import { useQueryClient } from '@tanstack/react-query';
 import { MapPinIcon, StarIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -66,7 +68,38 @@ export default function Orders() {
     status === 'all' ? undefined : { status }
   );
   const createReview = useCreateReview();
+  const updateReview = useUpdateReview();
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [updateConfirmOpen, setUpdateConfirmOpen] = useState(false);
+  const [existingReviewId, setExistingReviewId] = useState<string | number | undefined>(undefined);
+  const [resolvingReviewId, setResolvingReviewId] = useState(false);
+
+  type MyReviewsResponse = {
+    data?: {
+      reviews?: Array<{
+        id?: number | string;
+        restaurant?: { id?: number | string };
+      }>;
+    };
+  };
+
+  const resolveExistingReviewId = async (rid?: string) => {
+    if (!rid) return undefined as string | number | undefined;
+    try {
+      const my = await apiGet<MyReviewsResponse>('review/my-reviews', { page: 1, limit: 100 });
+      const list = my?.data?.reviews ?? [];
+      const target = list.find(r => {
+        const ridNum = Number(rid);
+        const rRestId = r?.restaurant?.id;
+        if (rRestId == null) return false;
+        const rNum = Number(rRestId);
+        return (Number.isFinite(ridNum) && Number.isFinite(rNum)) ? (rNum === ridNum) : String(rRestId) === String(rid);
+      });
+      return target?.id as string | number | undefined;
+    } catch {
+      return undefined as string | number | undefined;
+    }
+  };
   const [rating, setRating] = useState(4);
   const [comment, setComment] = useState('');
   const [current, setCurrent] = useState<{
@@ -428,30 +461,81 @@ export default function Orders() {
           />
           <Button
             className='mt-2 rounded-full h-11 sm:h-12 text-sm sm:text-[16px] cursor-pointer'
-            disabled={createReview.isPending || !current?.tx || !current?.rid}
-            onClick={() => {
+            disabled={createReview.isPending || updateReview.isPending || !current?.tx || !current?.rid}
+            onClick={async () => {
               if (!current?.tx || !current?.rid) return;
               const ridNum = Number(current.rid);
-              createReview.mutate(
-                {
+              try {
+                await createReview.mutateAsync({
                   transactionId: current.tx,
-                  restaurantId: Number.isFinite(ridNum)
-                    ? ridNum
-                    : (current.rid as string),
+                  restaurantId: Number.isFinite(ridNum) ? ridNum : (current.rid as string),
                   star: rating,
                   comment: comment.trim(),
-                },
-                {
-                  onSuccess: () => {
-                    setReviewOpen(false);
-                    setComment('');
-                  },
+                });
+                setReviewOpen(false);
+                setComment('');
+              } catch (err) {
+                const maybe = err as { code?: string; reviewId?: string | number };
+                if (maybe?.code === 'ALREADY_REVIEWED') {
+                  setExistingReviewId(maybe.reviewId);
+                  setUpdateConfirmOpen(true);
                 }
-              );
+              }
             }}
           >
-            {createReview.isPending ? 'Sending…' : 'Send'}
+            {createReview.isPending || updateReview.isPending ? 'Sending…' : 'Send'}
           </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Review Confirmation */}
+      <Dialog open={updateConfirmOpen} onOpenChange={setUpdateConfirmOpen}>
+        <DialogContent className='sm:max-w-md'>
+          <DialogHeader>
+            <DialogTitle className='text-lg font-bold'>Update Review?</DialogTitle>
+          </DialogHeader>
+          <div className='text-sm sm:text-[16px] text-gray-950'>
+            You have already submitted a review for {current?.rname || 'this restaurant'}. Do you want to update it with your new rating and comment?
+          </div>
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={() => setUpdateConfirmOpen(false)}
+              className='cursor-pointer text-sm sm:text-[16px]'
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={updateReview.isPending || resolvingReviewId}
+              onClick={async () => {
+                let id = existingReviewId;
+                if (!id) {
+                  try {
+                    setResolvingReviewId(true);
+                    id = await resolveExistingReviewId(current?.rid);
+                    setExistingReviewId(id);
+                  } finally {
+                    setResolvingReviewId(false);
+                  }
+                }
+                if (!id) {
+                  toast.error('Could not find your previous review. Please try again later.');
+                  return;
+                }
+                await updateReview.mutateAsync({
+                  reviewId: id,
+                  star: rating,
+                  comment: comment.trim(),
+                });
+                setUpdateConfirmOpen(false);
+                setReviewOpen(false);
+                setComment('');
+              }}
+              className='cursor-pointer text-sm sm:text-[16px]'
+            >
+              {updateReview.isPending || resolvingReviewId ? 'Updating…' : 'Update'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
       <LogoutDialog

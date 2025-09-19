@@ -47,16 +47,16 @@ export default function CartPage() {
   const QtyControl = ({ id, qty, pending }: { id: string; qty: number; pending?: boolean }) => (
     <div className="flex items-center gap-2">
       <button
-        className="size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 disabled:opacity-60 cursor-pointer"
+        className="size-7 xs:size-9 sm:size-10 rounded-full border border-neutral-300 grid place-items-center text-gray-950 disabled:opacity-60 cursor-pointer"
         aria-label="Decrease quantity"
         disabled={pending}
         onClick={() => { d(decrementQty({ id })); }}
       >
         <MinusIcon className="size-5 sm:size-6" />
       </button>
-      <div className="px-4 text-center text-[16px] sm:text-lg font-semibold">{qty}</div>
+      <div className="px-0 sm:px-4 text-center text-[16px] sm:text-lg font-semibold">{qty}</div>
       <button
-        className="size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center disabled:opacity-60 cursor-pointer"
+        className="size-7 xs:size-9 sm:size-10 rounded-full bg-[var(--color-brand,#D22B21)] text-white grid place-items-center disabled:opacity-60 cursor-pointer"
         aria-label="Increase quantity"
         disabled={pending}
         onClick={() => { d(incrementQty({ id })); }}
@@ -118,12 +118,12 @@ export default function CartPage() {
                         <Skeleton className="h-8 w-24 rounded-full" />
                       </div>
                     ) : (
-                      <div key={it.id} className="flex items-center gap-x-[17px] ">
-                        <img src={it.imageUrl || '/iconRectangle.png'} alt={it.name} className="h-20 w-20 object-cover rounded-lg " onError={(e)=>{ const img=e.currentTarget as HTMLImageElement; if(!img.src.includes('/iconRectangle.png')){ img.onerror=null; img.src='/fallback1.png'; }}} />
+                      <div key={it.id} className="flex items-center gap-x-4 sm:gap-x-[17px] ">
+                        <img src={it.imageUrl || '/iconRectangle.png'} alt={it.name} className="size-16 sm:h-20 sm:w-20 object-cover rounded-lg " onError={(e)=>{ const img=e.currentTarget as HTMLImageElement; if(!img.src.includes('/iconRectangle.png')){ img.onerror=null; img.src='/fallback1.png'; }}} />
 
                         <div className="flex-1">
-                          <div className="text-sm sm:text-[16px] leading-[30px] text-gray-950">{it.name}</div>
-                          <div className="text-gray-950 font-extrabold text-lg leading-[32px]">{formatCurrency(it.price)}</div>
+                          <div className="text-sm sm:text-[16px] sm:leading-[30px] text-gray-950">{it.name}</div>
+                          <div className="text-gray-950 font-extrabold text-[16px] sm:text-lg leading-[32px]">{formatCurrency(it.price)}</div>
                         </div>
                         <QtyControl id={it.id} qty={it.qty} pending={pendingRemove[it.id]} />
                         

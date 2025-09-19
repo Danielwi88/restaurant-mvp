@@ -17,10 +17,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import UserMenuContent from './user-menu-content';
 
-
 type StoredUser = { name?: string; avatar?: string; avatarUrl?: string };
-
-
 
 export default function Navbar() {
   const count = useAppSelector((s: RootState) =>
@@ -33,7 +30,7 @@ export default function Navbar() {
   const nav = useNavigate();
   const location = useLocation();
   const [logoutOpen, setLogoutOpen] = useState(false);
-  
+
   const searchParams = new URLSearchParams(location.search);
   const mode = (searchParams.get('mode') as 'in' | 'up' | null) ?? null;
 
@@ -112,25 +109,36 @@ export default function Navbar() {
       } catch {
         void 0;
       }
-      toast.success('Updating orders...', { className: 'mt-25 sm:mt-0' });
+      toast.success('Updating orders...', { className: 'mt-20 sm:mt-0' });
       const ops = items.map(async (it) => {
-        if (it.serverCartItemId) {
-          
-          await apiPut(`cart/${it.serverCartItemId}`, { quantity: it.qty });
-        } else if (it.restaurantId) {
-          
+        const restaurantIdNum = Number(it.restaurantId);
+        const menuIdNum = Number(it.id);
+        const payload = {
+          restaurantId: Number.isFinite(restaurantIdNum)
+            ? restaurantIdNum
+            : it.restaurantId,
+          menuId: Number.isFinite(menuIdNum) ? menuIdNum : it.id,
+          quantity: it.qty,
+        } as {
+          restaurantId: number | string | undefined;
+          menuId: number | string;
+          quantity: number;
+        };
 
-          const restaurantIdNum = Number(it.restaurantId);
-          const menuIdNum = Number(it.id);
+        if (it.serverCartItemId) {
+          try {
+            await apiPut(`cart/${it.serverCartItemId}`, { quantity: it.qty });
+            return;
+          } catch (err) {
+            if (import.meta.env.DEV)
+              console.warn('[navbar] Failed to parse', err);
+          }
+        }
+
+        if (it.restaurantId) {
           const res = await apiPost<{
             data?: { cartItem?: { id?: number | string } };
-          }>('cart', {
-            restaurantId: Number.isFinite(restaurantIdNum)
-              ? restaurantIdNum
-              : it.restaurantId,
-            menuId: Number.isFinite(menuIdNum) ? menuIdNum : it.id,
-            quantity: it.qty,
-          });
+          }>('cart', payload);
           const sid = res?.data?.cartItem?.id;
           if (sid)
             d(
@@ -241,7 +249,8 @@ export default function Navbar() {
               {/* Desktop buttons */}
               <div className='hidden sm:flex items-center gap-2'>
                 {(() => {
-                  const upActive = (mode === 'up' || !mode) && hovering !== 'in';
+                  const upActive =
+                    (mode === 'up' || !mode) && hovering !== 'in';
                   const inActive = mode === 'in' && hovering !== 'up';
 
                   const baseBtn =
@@ -302,17 +311,38 @@ export default function Navbar() {
                         fill='none'
                         className='size-7'
                       >
-                        <path d='M4 6h16' stroke='currentColor' strokeWidth='2' strokeLinecap='round' />
-                        <path d='M4 12h16' stroke='currentColor' strokeWidth='2' strokeLinecap='round' />
-                        <path d='M4 18h16' stroke='currentColor' strokeWidth='2' strokeLinecap='round' />
+                        <path
+                          d='M4 6h16'
+                          stroke='currentColor'
+                          strokeWidth='2'
+                          strokeLinecap='round'
+                        />
+                        <path
+                          d='M4 12h16'
+                          stroke='currentColor'
+                          strokeWidth='2'
+                          strokeLinecap='round'
+                        />
+                        <path
+                          d='M4 18h16'
+                          stroke='currentColor'
+                          strokeWidth='2'
+                          strokeLinecap='round'
+                        />
                       </svg>
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className='w-48' sideOffset={10}>
-                    <DropdownMenuItem onSelect={() => nav('/auth?mode=in')} className='cursor-pointer hover:scale-105 hover:font-bold'>
+                    <DropdownMenuItem
+                      onSelect={() => nav('/auth?mode=in')}
+                      className='cursor-pointer hover:scale-105 hover:font-bold'
+                    >
                       Sign In
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => nav('/auth?mode=up')} className='cursor-pointer hover:scale-105 hover:font-bold'>
+                    <DropdownMenuItem
+                      onSelect={() => nav('/auth?mode=up')}
+                      className='cursor-pointer hover:scale-105 hover:font-bold'
+                    >
                       Sign Up
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -350,7 +380,9 @@ export default function Navbar() {
                 name={name}
                 avatarUrl={avatarUrl}
                 onClickProfile={() => nav('/profile')}
-                onClickAddress={() => { /* placeholder route */ }}
+                onClickAddress={() => {
+                  /* placeholder route */
+                }}
                 onClickOrders={() => nav('/orders')}
                 onClickLogout={() => setLogoutOpen(true)}
               />

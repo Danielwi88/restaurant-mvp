@@ -107,16 +107,23 @@ export default function Checkout() {
         typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       if (tokenNow) {
         const ops = items.map(async (it) => {
+          const rnum = Number(it.restaurantId);
+          const mnum = Number(it.id);
+          const payload = {
+            restaurantId: Number.isFinite(rnum) ? rnum : it.restaurantId,
+            menuId: Number.isFinite(mnum) ? mnum : it.id,
+            quantity: it.qty,
+          } as { restaurantId?: number | string; menuId: number | string; quantity: number };
           if (it.serverCartItemId) {
-            await apiPut(`cart/${it.serverCartItemId}`, { quantity: it.qty });
-          } else if (it.restaurantId) {
-            const rnum = Number(it.restaurantId);
-            const mnum = Number(it.id);
-            await apiPost('cart', {
-              restaurantId: Number.isFinite(rnum) ? rnum : it.restaurantId,
-              menuId: Number.isFinite(mnum) ? mnum : it.id,
-              quantity: it.qty,
-            });
+            try {
+              await apiPut(`cart/${it.serverCartItemId}`, { quantity: it.qty });
+              return;
+            } catch {
+              // fall back to create below
+            }
+          }
+          if (it.restaurantId) {
+            await apiPost('cart', payload);
           }
         });
         await Promise.allSettled(ops);
