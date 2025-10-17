@@ -11,6 +11,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import UserMenuContent from './user-menu-content';
+import ThemeToggle from './ThemeToggle';
 
 type StoredUser = { name?: string; avatar?: string; avatarUrl?: string };
 
@@ -220,6 +221,9 @@ export default function Navbar() {
           </div>
         </Link>
         <div className='flex items-center gap-4 sm:gap-6'>
+          <ThemeToggle
+            className={`${!scrolled && isHome ? 'text-white' : 'text-zinc-900'}`}
+          />
           <button
             aria-label='Open cart'
             onClick={openCart}
