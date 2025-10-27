@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { apiGet, API_ORIGIN } from "../api/axios";
 import type { Restaurant, MenuItem } from "../../types";
+import type { AxiosError } from "axios";
 
 type RestaurantApi = {
   id: number | string
@@ -177,10 +178,28 @@ export const useRecommendedRestaurants = (options?: { enabled?: boolean }) =>
     queryKey: ["restaurants", "recommended"],
     enabled: options?.enabled ?? true,
     placeholderData: (prev) => prev,
+    retry: (failureCount, error) => {
+      const status = (error as AxiosError | undefined)?.response?.status;
+      if (status === 401 || status === 403) return false;
+      return failureCount < 3;
+    },
     queryFn: async () => {
-      const res = await apiGet<RestoRecommendedResponse>("resto/recommended");
-      const list = res?.data?.recommendations ?? [];
-      return list.map(mapRestaurant) as Restaurant[];
+      const hasToken =
+        typeof window !== "undefined" ? !!localStorage.getItem("token") : false;
+      if (!hasToken) {
+        return [] as Restaurant[];
+      }
+      try {
+        const res = await apiGet<RestoRecommendedResponse>("resto/recommended");
+        const list = res?.data?.recommendations ?? [];
+        return list.map(mapRestaurant) as Restaurant[];
+      } catch (err) {
+        const status = (err as AxiosError | undefined)?.response?.status;
+        if (status === 401 || status === 403) {
+          return [] as Restaurant[];
+        }
+        throw err;
+      }
     },
   });
 

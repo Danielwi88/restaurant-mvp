@@ -20,6 +20,34 @@ function normalizePrefix(input: string | undefined): string {
   return trimmed ? `/${trimmed}` : "";
 }
 
+function extractErrorMessage(payload: unknown): string | undefined {
+  if (!payload) return undefined;
+  if (typeof payload === "string") {
+    const txt = payload.trim();
+    return txt.length ? txt : undefined;
+  }
+  if (typeof payload === "object") {
+    const obj = payload as Record<string | number | symbol, unknown>;
+    const keys = ["message", "error", "detail", "title"] as const;
+    for (const key of keys) {
+      const value = obj[key];
+      if (typeof value === "string" && value.trim()) return value;
+    }
+    const errorsField = obj["errors"];
+    if (Array.isArray(errorsField) && errorsField.length > 0) {
+      const first = errorsField[0];
+      if (typeof first === "string" && first.trim()) return first;
+      if (first && typeof first === "object") {
+        const nested = first as Record<string, unknown>;
+        for (const value of Object.values(nested)) {
+          if (typeof value === "string" && value.trim()) return value;
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
 const base = normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL);
 const prefix = normalizePrefix(import.meta.env.VITE_API_PREFIX ?? "/api");
 
@@ -45,6 +73,33 @@ axios.interceptors.request.use((config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = (error?.response?.status ?? 0) as number;
+    if (status === 401 || status === 403) {
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          window.dispatchEvent(new Event("auth:changed"));
+        } catch {
+          // Ignore storage access issues (e.g., privacy mode)
+        }
+      }
+    }
+    const message =
+      extractErrorMessage(error?.response?.data) ?? extractErrorMessage(error?.message);
+    if (message && error instanceof Error) {
+      error.message = message;
+    }
+    if (message && !(error instanceof Error)) {
+      return Promise.reject(new Error(message));
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default axios;
 
